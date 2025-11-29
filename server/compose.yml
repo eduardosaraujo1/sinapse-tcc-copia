@@ -1,0 +1,59 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile.app
+        container_name: nidus-app
+        restart: unless-stopped
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - nidus-network
+
+    nginx:
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile.nginx
+        container_name: nidus-nginx
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
+        depends_on:
+            - app
+        networks:
+            - nidus-network
+
+    mysql:
+        image: mysql:8.0
+        container_name: nidus-mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:-nidus_db}
+            MYSQL_USER: ${MYSQL_USER:-application}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+            - ./.docker/mysql/script.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+        networks:
+            - nidus-network
+
+networks:
+    nidus-network:
+        driver: bridge
+
+volumes:
+    mysql_data:

@@ -1,0 +1,15 @@
+# Nginx Web Server Container
+# This Dockerfile sets up nginx with only the public folder (pre-built assets).
+# Build assets locally using bin/build-assets.sh before building this image.
+FROM nginx:alpine
+
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy custom nginx configuration
+COPY ./.docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 8080
+EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]

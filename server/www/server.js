@@ -2,17 +2,18 @@ const express = require("express");
 const cors = require("cors"); // <--- 1. Importação do CORS
 const mysql = require("mysql2/promise");
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.use(cors({ origin: "*" }));
-0;
+
 app.use(express.json());
 
 const dbConfig = {
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "AppNidus",
+    host: process.env.MYSQL_HOST || "nidus-mysql",
+    user: process.env.MYSQL_USER || "application",
+    password: process.env.MYSQL_PASSWORD || "secure_password",
+    database: process.env.MYSQL_DATABASE || "nidus_db",
+    port: parseInt(process.env.MYSQL_PORT) || 3306,
 };
 
 let pool;
@@ -2292,11 +2293,6 @@ app.get("/api/registrosdiarios", async (req, res) => {
             error: error.message,
         });
     }
-});
-
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
 });
 
 app.post("/api/delete-account", async (req, res) => {
