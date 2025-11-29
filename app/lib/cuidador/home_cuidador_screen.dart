@@ -3,7 +3,7 @@ import 'dart:convert'; // Para decodificar a resposta JSON
 import 'package:algumacoisa/cuidador/agenda_cuidador.dart';
 import 'package:algumacoisa/cuidador/selecionar_paciente_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Biblioteca HTTP
+import 'package:algumacoisa/dio_client.dart' as http; // Biblioteca HTTP
 
 import '../config.dart';
 import 'agendar_consultas_screen.dart';

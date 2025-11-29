@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // Necessário para converter JSON
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 
 import '../config.dart'; // Necessário para requisições HTTP
 

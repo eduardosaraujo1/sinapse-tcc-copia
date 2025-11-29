@@ -2,7 +2,8 @@ import 'dart:convert'; // Novo: para jsonEncode
 
 import 'package:algumacoisa/cuidador/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Novo: para requisições HTTP
+import 'package:algumacoisa/dio_client.dart'
+    as http; // Novo: para requisições HTTP
 
 import '../config.dart';
 

@@ -5,7 +5,7 @@ import 'package:algumacoisa/paciente/configuracoes_screen.dart';
 import 'package:algumacoisa/paciente/historicoregistro_paciente.dart';
 import 'package:algumacoisa/paciente/home_paciente.dart';
 import 'package:algumacoisa/paciente/meucuidador_paciente.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 import 'dart:convert';
 
 import '../config.dart';

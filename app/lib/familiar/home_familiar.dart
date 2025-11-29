@@ -10,7 +10,7 @@ import 'package:algumacoisa/familiar/notificacoes_screen.dart';
 import 'package:algumacoisa/familiar/sentimentos_familiar.dart';
 import 'package:algumacoisa/familiar/tarefas_familiar.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 
 import '../config.dart';
 

@@ -1,7 +1,7 @@
 import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
 import '../config.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 import 'dart:convert';
 
 class NotificationsScreen extends StatefulWidget {

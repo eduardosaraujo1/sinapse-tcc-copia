@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:algumacoisa/config.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 
 import '../paciente/detalhes_agenda.dart';
 

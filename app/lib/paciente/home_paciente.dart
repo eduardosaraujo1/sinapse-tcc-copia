@@ -5,7 +5,7 @@ import 'package:algumacoisa/paciente/emergencia_paciente.dart';
 import 'package:algumacoisa/paciente/mensagems_paciente.dart';
 import 'package:algumacoisa/paciente/perfil_paciente.dart';
 import 'package:algumacoisa/paciente/sentimentos_paciente.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 import 'dart:convert';
 
 import '../config.dart';

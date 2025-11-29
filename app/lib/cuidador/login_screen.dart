@@ -4,7 +4,7 @@ import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
 import 'package:algumacoisa/familiar/home_familiar.dart';
 import 'package:algumacoisa/paciente/home_paciente.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:algumacoisa/dio_client.dart' as http;
 
 import '../config.dart';
 import 'create_password_screen.dart';

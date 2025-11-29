@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Adicionar o pacote http
+import 'package:algumacoisa/dio_client.dart' as http; // Adicionar o pacote http
 import 'dart:convert'; // Necessário para jsonEncode
 
 // Certifique-se de que o caminho de importação esteja correto no seu projeto
