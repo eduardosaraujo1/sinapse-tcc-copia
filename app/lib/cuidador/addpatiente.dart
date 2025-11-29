@@ -42,7 +42,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color:    const Color.fromARGB(255, 106, 186, 213)),
+          icon: const Icon(Icons.arrow_back_ios, color:    Color.fromARGB(255, 106, 186, 213)),
           onPressed: () {
             Navigator.pop(context);
           },

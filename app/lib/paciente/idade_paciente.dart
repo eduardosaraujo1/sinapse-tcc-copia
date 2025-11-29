@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Adicionar o pacote http
 import 'dart:convert'; // Necessário para jsonEncode
+import '../config.dart';
 import 'sanguineo_paciente.dart';
 
 // --- CONFIGURAÇÃO DA API ---
 // Use o IP 10.0.2.2 se estiver usando o emulador Android!
 // Mude a porta e o endpoint se necessário.
-const String patientAgeApiUrl = 'http://localhost:8000/api/paciente/idade'; 
+const String patientAgeApiUrl = '${Config.apiUrl}/api/paciente/idade';
 
 class IdadePaciente extends StatefulWidget {
   const IdadePaciente({super.key});
@@ -37,11 +38,11 @@ class _IdadePacienteState extends State<IdadePaciente> {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   // --- FUNÇÃO PARA ENVIAR DADOS PARA A API NODE.JS (POST) ---
   Future<void> sendAgeToApi(int age) async {
     // 1. Log para rastrear no console do Flutter
-    print('Enviando idade: $age para a API: $patientAgeApiUrl'); 
+    print('Enviando idade: $age para a API: $patientAgeApiUrl');
 
     final response = await http.post(
       Uri.parse(patientAgeApiUrl),
@@ -49,17 +50,21 @@ class _IdadePacienteState extends State<IdadePaciente> {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, dynamic>{
-        'idade': age, 
+        'idade': age,
         // Você pode adicionar outros dados do paciente aqui, se necessário
       }),
     );
-    
+
     // 2. Log da resposta
-    print('Resposta da API - Status: ${response.statusCode}, Body: ${response.body}');
+    print(
+      'Resposta da API - Status: ${response.statusCode}, Body: ${response.body}',
+    );
 
     if (response.statusCode != 201) {
       // Se não for '201 Created', lança um erro com detalhes
-      throw Exception('Falha no envio de dados. Status: ${response.statusCode}. Detalhe: ${response.body}');
+      throw Exception(
+        'Falha no envio de dados. Status: ${response.statusCode}. Detalhe: ${response.body}',
+      );
     }
   }
   // --- FIM DA FUNÇÃO DE ENVIO ---
@@ -112,8 +117,12 @@ class _IdadePacienteState extends State<IdadePaciente> {
                           index.toString(),
                           style: TextStyle(
                             fontSize: isSelected ? 48 : 24,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? const Color.fromARGB(255, 106, 186, 213): Colors.grey[400],
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? const Color.fromARGB(255, 106, 186, 213)
+                                : Colors.grey[400],
                           ),
                         ),
                       );
@@ -127,39 +136,47 @@ class _IdadePacienteState extends State<IdadePaciente> {
                 width: double.infinity,
                 child: ElevatedButton(
                   // --- MODIFICAÇÃO PRINCIPAL AQUI ---
-                  onPressed: _isLoading ? null : () async {
-                    setState(() {
-                      _isLoading = true; // Inicia o carregamento
-                    });
-                    
-                    try {
-                      // 1. Tenta enviar o dado para o Node.js
-                      await sendAgeToApi(_currentAge);
-                      
-                      // 2. Se for bem-sucedido, navega para a próxima tela
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SanguineoPaciente()),
-                        );
-                      }
-                      
-                    } catch (e) {
-                      // 3. Se falhar, mostra um SnackBar com o erro
-                      print('ERRO CAPTURADO: $e');
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Falha ao salvar a idade: Tente novamente. Detalhe: ${e.toString()}')),
-                        );
-                      }
-                    } finally {
-                      if(mounted) {
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
                           setState(() {
-                            _isLoading = false; // Finaliza o carregamento
+                            _isLoading = true; // Inicia o carregamento
                           });
-                      }
-                    }
-                  },
+
+                          try {
+                            // 1. Tenta enviar o dado para o Node.js
+                            await sendAgeToApi(_currentAge);
+
+                            // 2. Se for bem-sucedido, navega para a próxima tela
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SanguineoPaciente(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            // 3. Se falhar, mostra um SnackBar com o erro
+                            print('ERRO CAPTURADO: $e');
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Falha ao salvar a idade: Tente novamente. Detalhe: ${e.toString()}',
+                                  ),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false; // Finaliza o carregamento
+                              });
+                            }
+                          }
+                        },
                   // --- FIM DA MODIFICAÇÃO PRINCIPAL ---
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 106, 186, 213),
@@ -172,7 +189,10 @@ class _IdadePacienteState extends State<IdadePaciente> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           'Continue',

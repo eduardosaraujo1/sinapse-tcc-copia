@@ -184,7 +184,7 @@ class _MedicacoesScreenState extends State<MedicacoesScreen> {
                   ],
                 ),
               );
-            }).toList(), // Adicionado .toList() para evitar problemas
+            }), // Adicionado .toList() para evitar problemas
             const SizedBox(height: 20),
             Center(
               child: IconButton(

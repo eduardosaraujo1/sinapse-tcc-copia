@@ -1,4 +1,5 @@
 import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
+import '../config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -32,9 +33,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
       // Buscar dados de todas as APIs simultaneamente
       final responses = await Future.wait([
-        http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComConsulta')),
-        http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComMedicamentos')),
-        http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComTarefas')),
+        http.get(
+          Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComConsulta'),
+        ),
+        http.get(
+          Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComMedicamentos'),
+        ),
+        http.get(Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComTarefas')),
       ]);
 
       // Processar cada resposta
@@ -84,8 +89,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+      'JAN',
+      'FEV',
+      'MAR',
+      'ABR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SET',
+      'OUT',
+      'NOV',
+      'DEZ',
     ];
     return months[month - 1];
   }
@@ -97,13 +112,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       final now = DateTime.now();
       final difference = date.difference(now);
       final days = difference.inDays;
-      
+
       if (days == 0) return 'Hoje!';
       if (days == 1) return 'Falta 1 dia!';
       if (days > 1) return 'Faltam $days dias!';
       if (days == -1) return 'Há 1 dia';
       if (days < -1) return 'Há ${days.abs()} dias';
-      
+
       return 'Data inválida';
     } catch (e) {
       return 'Data inválida';
@@ -130,7 +145,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificações', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'Notificações',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -148,96 +166,90 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE3F2FD),
-              Color(0xFFBBDEFB),
-            ],
+            colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
           ),
         ),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage.isNotEmpty
-                ? Center(child: Text(_errorMessage))
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        
-                        // Consultas
-                        if (_pacientesComConsultas.isNotEmpty) ...[
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              'Consultas',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
+            ? Center(child: Text(_errorMessage))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Consultas
+                    if (_pacientesComConsultas.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Consultas',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          ..._buildConsultasCards(),
-                          const SizedBox(height: 16),
-                        ],
-                        
-                        // Medicamentos
-                        if (_pacientesComMedicamentos.isNotEmpty) ...[
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              'Medicamentos',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
+                        ),
+                      ),
+                      ..._buildConsultasCards(),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Medicamentos
+                    if (_pacientesComMedicamentos.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Medicamentos',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          ..._buildMedicamentosCards(),
-                          const SizedBox(height: 16),
-                        ],
-                        
-                        // Tarefas
-                        if (_pacientesComTarefas.isNotEmpty) ...[
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              'Tarefas',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
+                        ),
+                      ),
+                      ..._buildMedicamentosCards(),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Tarefas
+                    if (_pacientesComTarefas.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Tarefas',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
-                          ..._buildTarefasCards(),
-                        ],
-                        
-                        // Mensagem se não houver dados
-                        if (_pacientesComConsultas.isEmpty &&
-                            _pacientesComMedicamentos.isEmpty &&
-                            _pacientesComTarefas.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.all(32.0),
-                            child: Text(
-                              'Nenhuma notificação encontrada',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                        ),
+                      ),
+                      ..._buildTarefasCards(),
+                    ],
+
+                    // Mensagem se não houver dados
+                    if (_pacientesComConsultas.isEmpty &&
+                        _pacientesComMedicamentos.isEmpty &&
+                        _pacientesComTarefas.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Text(
+                          'Nenhuma notificação encontrada',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
       ),
     );
   }
 
   List<Widget> _buildConsultasCards() {
     List<Widget> cards = [];
-    
+
     for (var paciente in _pacientesComConsultas) {
       for (var consulta in paciente['consultas']) {
         cards.add(
@@ -254,13 +266,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         cards.add(const SizedBox(height: 12));
       }
     }
-    
+
     return cards;
   }
 
   List<Widget> _buildMedicamentosCards() {
     List<Widget> cards = [];
-    
+
     for (var paciente in _pacientesComMedicamentos) {
       for (var medicamento in paciente['medicamentos']) {
         cards.add(
@@ -277,13 +289,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         cards.add(const SizedBox(height: 12));
       }
     }
-    
+
     return cards;
   }
 
   List<Widget> _buildTarefasCards() {
     List<Widget> cards = [];
-    
+
     for (var paciente in _pacientesComTarefas) {
       for (var tarefa in paciente['tarefas']) {
         cards.add(
@@ -300,7 +312,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         cards.add(const SizedBox(height: 12));
       }
     }
-    
+
     return cards;
   }
 
@@ -314,9 +326,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     IconData icon,
   ) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -364,16 +374,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       Expanded(
                         child: Text(
                           title,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                  Text(subtitle, style: const TextStyle(fontSize: 14)),
                   if (description.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
@@ -383,7 +393,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ],
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(4),

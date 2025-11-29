@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 import 'detalhes_agenda.dart';
 
 class AgendaPaciente extends StatefulWidget {
@@ -30,19 +33,19 @@ class _AgendaPaciente extends State<AgendaPaciente> {
       });
 
       print('🔄 Iniciando carregamento da agenda...');
-      
+
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteComAgendaCompleta'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComAgendaCompleta'),
       );
 
       print('📡 Status da resposta: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         print('✅ API retornou success: ${data['success']}');
         print('📊 Total de pacientes: ${data['data']?.length}');
-        
+
         if (data['success'] == true) {
           setState(() {
             pacientesComAgenda = data['data'];
@@ -83,8 +86,18 @@ class _AgendaPaciente extends State<AgendaPaciente> {
 
   String _getMonthName(DateTime date) {
     const months = [
-      'JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN',
-      'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'
+      'JAN',
+      'FEV',
+      'MAR',
+      'ABR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SET',
+      'OUT',
+      'NOV',
+      'DEZ',
     ];
     return months[date.month - 1];
   }
@@ -94,7 +107,7 @@ class _AgendaPaciente extends State<AgendaPaciente> {
     final now = _selectedDate;
     // Encontra o primeiro dia da semana (domingo)
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday % 7));
-    
+
     List<DateTime> week = [];
     for (int i = 0; i < 7; i++) {
       week.add(firstDayOfWeek.add(Duration(days: i)));
@@ -104,7 +117,7 @@ class _AgendaPaciente extends State<AgendaPaciente> {
 
   List<Map<String, dynamic>> _getEventosDoDia(DateTime date) {
     final eventos = [];
-    
+
     for (var paciente in pacientesComAgenda) {
       // Consultas
       if (paciente['consultas'] != null) {
@@ -117,7 +130,8 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                   'tipo': 'consulta',
                   'titulo': 'Consulta - ${consulta['especialidade']}',
                   'subtitulo': 'Dr. ${consulta['medico_nome']}',
-                  'hora': '${dataConsulta.hour.toString().padLeft(2, '0')}:${dataConsulta.minute.toString().padLeft(2, '0')}',
+                  'hora':
+                      '${dataConsulta.hour.toString().padLeft(2, '0')}:${dataConsulta.minute.toString().padLeft(2, '0')}',
                   'paciente': paciente['nome'],
                   'status': consulta['status'],
                   'dados': consulta,
@@ -125,7 +139,9 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                 });
               }
             } catch (e) {
-              print('❌ Erro ao parse data da consulta: ${consulta['hora_consulta']}');
+              print(
+                '❌ Erro ao parse data da consulta: ${consulta['hora_consulta']}',
+              );
             }
           }
         }
@@ -142,7 +158,8 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                   'tipo': 'medicamento',
                   'titulo': 'Medicamento - ${medicamento['medicamento_nome']}',
                   'subtitulo': 'Dosagem: ${medicamento['dosagem']}',
-                  'hora': '${dataMedicamento.hour.toString().padLeft(2, '0')}:${dataMedicamento.minute.toString().padLeft(2, '0')}',
+                  'hora':
+                      '${dataMedicamento.hour.toString().padLeft(2, '0')}:${dataMedicamento.minute.toString().padLeft(2, '0')}',
                   'paciente': paciente['nome'],
                   'status': medicamento['status'],
                   'dados': medicamento,
@@ -150,7 +167,9 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                 });
               }
             } catch (e) {
-              print('❌ Erro ao parse data do medicamento: ${medicamento['data_hora']}');
+              print(
+                '❌ Erro ao parse data do medicamento: ${medicamento['data_hora']}',
+              );
             }
           }
         }
@@ -189,8 +208,8 @@ class _AgendaPaciente extends State<AgendaPaciente> {
 
   bool _isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
-           date1.month == date2.month &&
-           date1.day == date2.day;
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   Color _getEventColor(String tipo) {
@@ -262,139 +281,137 @@ class _AgendaPaciente extends State<AgendaPaciente> {
               ),
             )
           : errorMessage.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        errorMessage,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _carregarAgenda,
-                        child: Text('Tentar Novamente'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  SizedBox(height: 16),
+                  Text(
+                    errorMessage,
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
-                )
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _carregarAgenda,
+                    child: Text('Tentar Novamente'),
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Cabeçalho do mês
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Cabeçalho do mês
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${_getMonthName(_selectedDate)} ${_selectedDate.year}',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: _navigateToPreviousMonth,
-                              icon: const Icon(Icons.arrow_back_ios),
-                            ),
-                            IconButton(
-                              onPressed: _navigateToNextMonth,
-                              icon: const Icon(Icons.arrow_forward_ios),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Dias da semana - CORRIGIDO
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: currentWeek.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final date = entry.value;
-                            final isSelected = _isSameDay(date, _selectedDate);
-                            final dayNames = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-                            
-                            return _buildDayOfWeek(
-                              dayNames[index],
-                              date.day,
-                              isSelected,
-                              onTap: () => _selectDate(date),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 24),
-                        
-                        // Cabeçalho de eventos
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Eventos do Dia',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Lista de eventos
-                        if (eventosDoDia.isEmpty)
-                          const Center(
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.event_available,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(height: 16),
-                                Text(
-                                  'Nenhum evento para este dia',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          Column(
-                            children: eventosDoDia.map((evento) {
-                              return _buildEventCard(context, evento);
-                            }).toList(),
+                        Text(
+                          '${_getMonthName(_selectedDate)} ${_selectedDate.year}',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
                           ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: _navigateToPreviousMonth,
+                          icon: const Icon(Icons.arrow_back_ios),
+                        ),
+                        IconButton(
+                          onPressed: _navigateToNextMonth,
+                          icon: const Icon(Icons.arrow_forward_ios),
+                        ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 16),
+
+                    // Dias da semana - CORRIGIDO
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: currentWeek.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final date = entry.value;
+                        final isSelected = _isSameDay(date, _selectedDate);
+                        final dayNames = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+
+                        return _buildDayOfWeek(
+                          dayNames[index],
+                          date.day,
+                          isSelected,
+                          onTap: () => _selectDate(date),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Cabeçalho de eventos
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Eventos do Dia',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Lista de eventos
+                    if (eventosDoDia.isEmpty)
+                      const Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.event_available,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Nenhum evento para este dia',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Column(
+                        children: eventosDoDia.map((evento) {
+                          return _buildEventCard(context, evento);
+                        }).toList(),
+                      ),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 
-  Widget _buildDayOfWeek(String day, int date, bool isSelected, {VoidCallback? onTap}) {
+  Widget _buildDayOfWeek(
+    String day,
+    int date,
+    bool isSelected, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -404,7 +421,9 @@ class _AgendaPaciente extends State<AgendaPaciente> {
           color: isSelected ? Colors.blue.shade100 : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color.fromARGB(255, 106, 186, 213) : Colors.transparent,
+            color: isSelected
+                ? const Color.fromARGB(255, 106, 186, 213)
+                : Colors.transparent,
             width: 2,
           ),
         ),
@@ -415,7 +434,9 @@ class _AgendaPaciente extends State<AgendaPaciente> {
               day,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey,
+                color: isSelected
+                    ? const Color.fromARGB(255, 106, 186, 213)
+                    : Colors.grey,
               ),
             ),
             const SizedBox(height: 4),
@@ -424,7 +445,9 @@ class _AgendaPaciente extends State<AgendaPaciente> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: isSelected ? const Color.fromARGB(255, 106, 186, 213) : Colors.black,
+                color: isSelected
+                    ? const Color.fromARGB(255, 106, 186, 213)
+                    : Colors.black,
               ),
             ),
           ],
@@ -435,16 +458,12 @@ class _AgendaPaciente extends State<AgendaPaciente> {
 
   Widget _buildEventCard(BuildContext context, Map<String, dynamic> evento) {
     final color = _getEventColor(evento['tipo']);
-    
+
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => DetalhesAgenda(
-        
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => DetalhesAgenda()),
         );
       },
       child: Card(
@@ -459,11 +478,7 @@ class _AgendaPaciente extends State<AgendaPaciente> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(
-                _getEventIcon(evento['tipo']),
-                color: color,
-                size: 24,
-              ),
+              Icon(_getEventIcon(evento['tipo']), color: color, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -490,10 +505,7 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                       children: [
                         const Icon(Icons.access_time, size: 16),
                         const SizedBox(width: 4),
-                        Text(
-                          evento['hora'],
-                          style: TextStyle(color: color),
-                        ),
+                        Text(evento['hora'], style: TextStyle(color: color)),
                         const SizedBox(width: 16),
                         const Icon(Icons.person, size: 16),
                         const SizedBox(width: 4),
@@ -506,11 +518,7 @@ class _AgendaPaciente extends State<AgendaPaciente> {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey,
-                size: 16,
-              ),
+              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
             ],
           ),
         ),

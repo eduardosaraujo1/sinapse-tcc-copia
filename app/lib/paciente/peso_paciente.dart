@@ -3,11 +3,13 @@ import 'package:http/http.dart' as http; // Adicionar o pacote http
 import 'dart:convert'; // Necessário para jsonEncode
 
 // Certifique-se de que o caminho de importação esteja correto no seu projeto
-import 'package:algumacoisa/paciente/idade_paciente.dart'; 
+import 'package:algumacoisa/paciente/idade_paciente.dart';
+
+import '../config.dart';
 
 // --- CONFIGURAÇÃO DA API ---
 // É uma URL diferente (peso)
-const String patientWeightApiUrl = 'http://localhost:8000/api/paciente/peso'; 
+const String patientWeightApiUrl = '${Config.apiUrl}/api/paciente/peso';
 
 class PesoPaciente extends StatefulWidget {
   const PesoPaciente({super.key});
@@ -33,22 +35,25 @@ class _PesoPacienteState extends State<PesoPaciente> {
       },
       // Passa o peso como um double para o JSON
       body: jsonEncode(<String, dynamic>{
-        'peso': weight, 
+        'peso': weight,
         // Você pode adicionar outros dados do paciente aqui, se necessário
       }),
     );
 
     // 2. Log da resposta
-    print('Resposta da API - Status: ${response.statusCode}, Body: ${response.body}');
+    print(
+      'Resposta da API - Status: ${response.statusCode}, Body: ${response.body}',
+    );
 
     // A API Node.js geralmente retorna 201 (Created) ou 200 (OK)
     if (response.statusCode != 201 && response.statusCode != 200) {
       // Se não for bem-sucedido, lança um erro com detalhes
-      throw Exception('Falha no envio de dados. Status: ${response.statusCode}. Detalhe: ${response.body}');
+      throw Exception(
+        'Falha no envio de dados. Status: ${response.statusCode}. Detalhe: ${response.body}',
+      );
     }
   }
   // --- FIM DA FUNÇÃO DE ENVIO ---
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +93,7 @@ class _PesoPacienteState extends State<PesoPaciente> {
                         children: [
                           TextSpan(
                             // Mostra o peso com zero casas decimais (ou ajuste se precisar de precisão)
-                            text: _currentWeight.toStringAsFixed(0), 
+                            text: _currentWeight.toStringAsFixed(0),
                             style: const TextStyle(
                               fontSize: 80,
                               fontWeight: FontWeight.bold,
@@ -97,10 +102,7 @@ class _PesoPacienteState extends State<PesoPaciente> {
                           ),
                           const TextSpan(
                             text: ' Kg',
-                            style: TextStyle(
-                              fontSize: 24,
-                              color: Colors.black,
-                            ),
+                            style: TextStyle(fontSize: 24, color: Colors.black),
                           ),
                         ],
                       ),
@@ -109,19 +111,30 @@ class _PesoPacienteState extends State<PesoPaciente> {
                     SliderTheme(
                       data: SliderThemeData(
                         thumbColor: const Color.fromARGB(255, 106, 186, 213),
-                        activeTrackColor: const Color.fromARGB(255, 106, 186, 213),
-                        inactiveTrackColor:const Color.fromARGB(255, 106, 186, 213).withOpacity(0.1),
+                        activeTrackColor: const Color.fromARGB(
+                          255,
+                          106,
+                          186,
+                          213,
+                        ),
+                        inactiveTrackColor: const Color.fromARGB(
+                          255,
+                          106,
+                          186,
+                          213,
+                        ).withOpacity(0.1),
                         trackHeight: 2,
                       ),
                       child: Slider(
                         value: _currentWeight,
                         min: 30,
                         max: 200,
-                        divisions: 170, // 200 - 30 = 170 divisões para passos de 1kg
+                        divisions:
+                            170, // 200 - 30 = 170 divisões para passos de 1kg
                         onChanged: (double value) {
                           setState(() {
                             // Arredonda para o número inteiro mais próximo, já que divisions está em 1kg
-                            _currentWeight = value.roundToDouble(); 
+                            _currentWeight = value.roundToDouble();
                           });
                         },
                       ),
@@ -136,45 +149,55 @@ class _PesoPacienteState extends State<PesoPaciente> {
                   ],
                 ),
               ),
-              const SizedBox(height: 200), // Espaçamento para empurrar o botão para baixo
+              const SizedBox(
+                height: 200,
+              ), // Espaçamento para empurrar o botão para baixo
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   // Desabilita o botão enquanto carrega
-                  onPressed: _isLoading ? null : () async { 
-                    setState(() {
-                      _isLoading = true; // Inicia o carregamento
-                    });
-                    
-                    try {
-                      // 1. Tenta enviar o peso para o Node.js
-                      await sendWeightToApi(_currentWeight);
-                      
-                      // 2. Se for bem-sucedido, navega para a próxima tela (IdadePaciente)
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const IdadePaciente()),
-                        );
-                      }
-                      
-                    } catch (e) {
-                      // 3. Se falhar, mostra um SnackBar com o erro
-                      print('ERRO CAPTURADO: $e');
-                      if (mounted) {
-                        // Mostra uma mensagem amigável de erro
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Falha ao salvar o peso. Por favor, verifique sua conexão com a API e tente novamente.')),
-                        );
-                      }
-                    } finally {
-                      if(mounted) {
-                        setState(() {
-                          _isLoading = false; // Finaliza o carregamento, independentemente do sucesso/falha
-                        });
-                      }
-                    }
-                  },
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true; // Inicia o carregamento
+                          });
+
+                          try {
+                            // 1. Tenta enviar o peso para o Node.js
+                            await sendWeightToApi(_currentWeight);
+
+                            // 2. Se for bem-sucedido, navega para a próxima tela (IdadePaciente)
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const IdadePaciente(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            // 3. Se falhar, mostra um SnackBar com o erro
+                            print('ERRO CAPTURADO: $e');
+                            if (mounted) {
+                              // Mostra uma mensagem amigável de erro
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Falha ao salvar o peso. Por favor, verifique sua conexão com a API e tente novamente.',
+                                  ),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading =
+                                    false; // Finaliza o carregamento, independentemente do sucesso/falha
+                              });
+                            }
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 106, 186, 213),
                     shape: RoundedRectangleBorder(
@@ -182,11 +205,15 @@ class _PesoPacienteState extends State<PesoPaciente> {
                     ),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: _isLoading // Mostra o indicador de progresso ou o texto "Continue"
+                  child:
+                      _isLoading // Mostra o indicador de progresso ou o texto "Continue"
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           'Continue',

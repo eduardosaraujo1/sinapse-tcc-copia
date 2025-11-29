@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 // =======================
 // 1. MODELO DE REGISTRO DIÁRIO
@@ -50,7 +53,9 @@ class RegistroDiario {
       id: json['id'] ?? 0,
       pacienteId: json['paciente_id'] ?? 0,
       pacienteNome: json['paciente_nome'] ?? 'Nome não informado',
-      pacienteIdade: json['paciente_idade'] is int ? json['paciente_idade'] : int.tryParse(json['paciente_idade'].toString()),
+      pacienteIdade: json['paciente_idade'] is int
+          ? json['paciente_idade']
+          : int.tryParse(json['paciente_idade'].toString()),
       tipoSanguineo: json['tipo_sanguineo']?.toString(),
       comorbidade: json['comorbidade']?.toString(),
       atividadesRealizadas: json['atividades_realizadas']?.toString(),
@@ -58,8 +63,12 @@ class RegistroDiario {
       observacoesGerais: json['observacoes_gerais']?.toString(),
       estadoGeral: json['estado_geral']?.toString(),
       observacoesSentimentos: json['observacoes_sentimentos']?.toString(),
-      temperatura: json['temperatura'] is double ? json['temperatura'] : double.tryParse(json['temperatura'].toString()),
-      glicemia: json['glicemia'] is double ? json['glicemia'] : double.tryParse(json['glicemia'].toString()),
+      temperatura: json['temperatura'] is double
+          ? json['temperatura']
+          : double.tryParse(json['temperatura'].toString()),
+      glicemia: json['glicemia'] is double
+          ? json['glicemia']
+          : double.tryParse(json['glicemia'].toString()),
       pressaoArterial: json['pressao_arterial']?.toString(),
       outrasObservacoes: json['outras_observacoes']?.toString(),
       dataRegistro: json['data_registro']?.toString() ?? '',
@@ -75,7 +84,8 @@ class VisualizarRegistrosScreen extends StatefulWidget {
   const VisualizarRegistrosScreen({super.key});
 
   @override
-  _VisualizarRegistrosScreenState createState() => _VisualizarRegistrosScreenState();
+  _VisualizarRegistrosScreenState createState() =>
+      _VisualizarRegistrosScreenState();
 }
 
 class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
@@ -111,7 +121,7 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
     try {
       print('🔍 Iniciando busca de registros diários...');
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/registrosdiarios'),
+        Uri.parse('${Config.apiUrl}/api/registrosdiarios'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -126,7 +136,9 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
         List<RegistroDiario> registrosList = [];
 
         if (responseData is List) {
-          registrosList = responseData.map<RegistroDiario>((json) => RegistroDiario.fromJson(json)).toList();
+          registrosList = responseData
+              .map<RegistroDiario>((json) => RegistroDiario.fromJson(json))
+              .toList();
         } else if (responseData is Map && responseData['data'] is List) {
           registrosList = (responseData['data'] as List)
               .map<RegistroDiario>((json) => RegistroDiario.fromJson(json))
@@ -148,7 +160,9 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
         print('✅ ${registrosList.length} registros carregados com sucesso');
         return registrosList;
       } else {
-        throw Exception('Falha ao carregar registros. Código: ${response.statusCode}');
+        throw Exception(
+          'Falha ao carregar registros. Código: ${response.statusCode}',
+        );
       }
     } catch (e) {
       print('❌ Erro ao buscar registros: $e');
@@ -171,10 +185,12 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
       } else {
         _filteredRegistros = _allRegistros.where((registro) {
           return registro.pacienteNome.toLowerCase().contains(query) ||
-              (registro.tipoSanguineo?.toLowerCase().contains(query) ?? false) ||
+              (registro.tipoSanguineo?.toLowerCase().contains(query) ??
+                  false) ||
               (registro.comorbidade?.toLowerCase().contains(query) ?? false) ||
               (registro.estadoGeral?.toLowerCase().contains(query) ?? false) ||
-              (registro.atividadesRealizadas?.toLowerCase().contains(query) ?? false);
+              (registro.atividadesRealizadas?.toLowerCase().contains(query) ??
+                  false);
         }).toList();
       }
     });
@@ -206,7 +222,9 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      registro.pacienteNome.isNotEmpty ? registro.pacienteNome[0].toUpperCase() : '?',
+                      registro.pacienteNome.isNotEmpty
+                          ? registro.pacienteNome[0].toUpperCase()
+                          : '?',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -231,19 +249,26 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
                       const SizedBox(height: 4),
                       _buildInfoRow('📅', 'Data: ${registro.dataFormatada}'),
                       if (registro.pacienteIdade != null)
-                        _buildInfoRow('👤', 'Idade: ${registro.pacienteIdade} anos'),
+                        _buildInfoRow(
+                          '👤',
+                          'Idade: ${registro.pacienteIdade} anos',
+                        ),
                       if (registro.tipoSanguineo != null)
-                        _buildInfoRow('🩸', 'Tipo Sanguíneo: ${registro.tipoSanguineo}'),
+                        _buildInfoRow(
+                          '🩸',
+                          'Tipo Sanguíneo: ${registro.tipoSanguineo}',
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Comorbidade
-            if (registro.comorbidade != null && registro.comorbidade!.isNotEmpty)
+            if (registro.comorbidade != null &&
+                registro.comorbidade!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -253,7 +278,10 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
                     Expanded(
                       child: Text(
                         'Comorbidade: ${registro.comorbidade}',
-                        style: const TextStyle(color: Colors.black54, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -300,7 +328,8 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
   // 6. SEÇÃO DE ATIVIDADES
   // =======================
   Widget _buildAtividadesSection(RegistroDiario registro) {
-    if (registro.atividadesRealizadas == null && registro.outrasAtividades == null) {
+    if (registro.atividadesRealizadas == null &&
+        registro.outrasAtividades == null) {
       return const SizedBox();
     }
 
@@ -323,13 +352,13 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         if (registro.atividadesRealizadas != null)
           _buildInfoItem('📋 Atividades:', registro.atividadesRealizadas!),
-        
+
         if (registro.outrasAtividades != null)
           _buildInfoItem('➕ Outras Atividades:', registro.outrasAtividades!),
-        
+
         if (registro.observacoesGerais != null)
           _buildInfoItem('📝 Observações Gerais:', registro.observacoesGerais!),
       ],
@@ -340,7 +369,8 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
   // 7. SEÇÃO DE ESTADO GERAL
   // =======================
   Widget _buildEstadoGeralSection(RegistroDiario registro) {
-    if (registro.estadoGeral == null && registro.observacoesSentimentos == null) {
+    if (registro.estadoGeral == null &&
+        registro.observacoesSentimentos == null) {
       return const SizedBox();
     }
 
@@ -363,15 +393,21 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         if (registro.estadoGeral != null)
           Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _getEstadoGeralColor(registro.estadoGeral!).withOpacity(0.1),
+              color: _getEstadoGeralColor(
+                registro.estadoGeral!,
+              ).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _getEstadoGeralColor(registro.estadoGeral!).withOpacity(0.3)),
+              border: Border.all(
+                color: _getEstadoGeralColor(
+                  registro.estadoGeral!,
+                ).withOpacity(0.3),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -392,7 +428,7 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
               ],
             ),
           ),
-        
+
         if (registro.observacoesSentimentos != null)
           _buildInfoItem('💬 Observações:', registro.observacoesSentimentos!),
       ],
@@ -403,7 +439,9 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
   // 8. SEÇÃO DE SINAIS CLÍNICOS
   // =======================
   Widget _buildSinaisClinicosSection(RegistroDiario registro) {
-    if (registro.temperatura == null && registro.glicemia == null && registro.pressaoArterial == null) {
+    if (registro.temperatura == null &&
+        registro.glicemia == null &&
+        registro.pressaoArterial == null) {
       return const SizedBox();
     }
 
@@ -426,19 +464,31 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         Wrap(
           spacing: 12,
           runSpacing: 8,
           children: [
             if (registro.temperatura != null)
-              _buildSinalClinicoItem('🌡️', 'Temperatura', '${registro.temperatura}°C'),
-            
+              _buildSinalClinicoItem(
+                '🌡️',
+                'Temperatura',
+                '${registro.temperatura}°C',
+              ),
+
             if (registro.glicemia != null)
-              _buildSinalClinicoItem('🩸', 'Glicemia', '${registro.glicemia} mg/dL'),
-            
+              _buildSinalClinicoItem(
+                '🩸',
+                'Glicemia',
+                '${registro.glicemia} mg/dL',
+              ),
+
             if (registro.pressaoArterial != null)
-              _buildSinalClinicoItem('❤️', 'Pressão', registro.pressaoArterial!),
+              _buildSinalClinicoItem(
+                '❤️',
+                'Pressão',
+                registro.pressaoArterial!,
+              ),
           ],
         ),
       ],
@@ -472,7 +522,7 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         _buildInfoItem('📋', registro.outrasObservacoes!),
       ],
     );
@@ -516,11 +566,7 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
           const SizedBox(height: 4),
           Text(
             titulo,
-            style: const TextStyle(
-              fontSize: 11,
-         
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 2),
           Text(
@@ -605,7 +651,10 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 106, 186, 213),
             ),
-            child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Tentar Novamente',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -621,12 +670,12 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
   // =======================
   // 12. BOTÃO HOME
   // =======================
- void _irParaHome() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => HomeCuidadorScreen()),
-  );
-}
+  void _irParaHome() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeCuidadorScreen()),
+    );
+  }
 
   // =======================
   // 13. CONSTRUÇÃO DA TELA
@@ -639,12 +688,12 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
         elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-         onPressed: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => HomeCuidadorScreen()),
-  );
-},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomeCuidadorScreen()),
+            );
+          },
         ),
         title: const Text(
           'Registros Diários',
@@ -681,7 +730,10 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 20.0,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -707,7 +759,8 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
               child: FutureBuilder<List<RegistroDiario>>(
                 future: _registrosFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting && !_isLoading) {
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      !_isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return _buildErrorWidget();
@@ -716,7 +769,11 @@ class _VisualizarRegistrosScreenState extends State<VisualizarRegistrosScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.assignment_outlined, size: 64, color: Colors.grey),
+                          Icon(
+                            Icons.assignment_outlined,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
                           SizedBox(height: 16),
                           Text(
                             'Nenhum registro encontrado',

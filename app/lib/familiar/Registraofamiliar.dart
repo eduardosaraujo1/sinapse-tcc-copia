@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
+import '../config.dart';
 
 // --- CONFIGURAÇÃO DA API ---
-const String familiarCadastroApiUrl = 'http://localhost:8000/api/familiar/cadastro';
+const String familiarCadastroApiUrl = '${Config.apiUrl}/api/familiar/cadastro';
 
 class Registraofamiliar extends StatefulWidget {
   const Registraofamiliar({super.key});
@@ -21,22 +23,32 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  
+
   // Variáveis para Dropdown e Radio Button
   String? _selectedGender;
   int? _selectedDay;
   String? _selectedMonth;
   int? _selectedYear;
-  
+
   // Mapa de meses para números (para facilitar a formatação da data)
   final Map<String, String> _monthMap = {
-    "Janeiro": "01", "Fevereiro": "02", "Março": "03", "Abril": "04", 
-    "Maio": "05", "Junho": "06", "Julho": "07", "Agosto": "08", 
-    "Setembro": "09", "Outubro": "10", "Novembro": "11", "Dezembro": "12"
+    "Janeiro": "01",
+    "Fevereiro": "02",
+    "Março": "03",
+    "Abril": "04",
+    "Maio": "05",
+    "Junho": "06",
+    "Julho": "07",
+    "Agosto": "08",
+    "Setembro": "09",
+    "Outubro": "10",
+    "Novembro": "11",
+    "Dezembro": "12",
   };
 
   @override
@@ -53,20 +65,25 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
   // --- FUNÇÃO DE SUBMISSÃO DA API ---
   Future<void> _submitRegistration() async {
     if (!_formKey.currentState!.validate()) {
-      return; 
+      return;
     }
 
     // 1. Validação de Senha e Data
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('As senhas não coincidem.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('As senhas não coincidem.')));
       return;
     }
-    
-    if (_selectedDay == null || _selectedMonth == null || _selectedYear == null || _selectedGender == null) {
+
+    if (_selectedDay == null ||
+        _selectedMonth == null ||
+        _selectedYear == null ||
+        _selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha a data de nascimento e o gênero.')),
+        const SnackBar(
+          content: Text('Por favor, preencha a data de nascimento e o gênero.'),
+        ),
       );
       return;
     }
@@ -85,7 +102,8 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
       'endereco': _addressController.text.trim(),
       'data_nascimento': dataNascimento,
       'genero': _selectedGender,
-      'senha': _passwordController.text, // A senha será criptografada no backend
+      'senha':
+          _passwordController.text, // A senha será criptografada no backend
     };
 
     try {
@@ -109,15 +127,20 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
           );
         }
       } else {
-         final errorBody = jsonDecode(response.body);
-         final errorMessage = errorBody['error'] ?? 'Erro desconhecido no cadastro.';
-         throw Exception(errorMessage);
+        final errorBody = jsonDecode(response.body);
+        final errorMessage =
+            errorBody['error'] ?? 'Erro desconhecido no cadastro.';
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('Erro ao enviar dados de cadastro: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Falha no cadastro: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(
+            content: Text(
+              'Falha no cadastro: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
+          ),
         );
       }
     } finally {
@@ -126,10 +149,15 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
       }
     }
   }
-  
+
   // Método auxiliar para campos de texto (Agora usa TextFormField com validation)
-  Widget _buildTextField(String hint, TextEditingController controller, String? Function(String?) validator,
-      {TextInputType type = TextInputType.text, bool isPassword = false}) {
+  Widget _buildTextField(
+    String hint,
+    TextEditingController controller,
+    String? Function(String?) validator, {
+    TextInputType type = TextInputType.text,
+    bool isPassword = false,
+  }) {
     // Estilo de borda
     final OutlineInputBorder borderStyle = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10.0),
@@ -138,7 +166,10 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
     // Estilo de foco
     final OutlineInputBorder focusStyle = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10.0),
-      borderSide: const BorderSide(color: Color.fromARGB(255, 106, 186, 213), width: 2),
+      borderSide: const BorderSide(
+        color: Color.fromARGB(255, 106, 186, 213),
+        width: 2,
+      ),
     );
 
     return TextFormField(
@@ -148,13 +179,18 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16.0,
+          horizontal: 16.0,
+        ),
         border: borderStyle,
         enabledBorder: borderStyle,
         focusedBorder: focusStyle,
         filled: true,
         fillColor: Colors.white,
-        suffixIcon: isPassword ? const Icon(Icons.visibility_off, color: Colors.black54) : null,
+        suffixIcon: isPassword
+            ? const Icon(Icons.visibility_off, color: Colors.black54)
+            : null,
       ),
     );
   }
@@ -163,7 +199,10 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
   InputDecoration _dropDownDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 12.0,
+        horizontal: 12.0,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
         borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
@@ -174,7 +213,10 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 106, 186, 213), width: 2),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 106, 186, 213),
+          width: 2,
+        ),
       ),
       filled: true,
       fillColor: Colors.white,
@@ -214,66 +256,93 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
               const SizedBox(height: 40),
 
               // Nome Completo
-              const Text("Nome Completo *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Nome Completo *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu nome", _nameController, (value) => value!.isEmpty ? 'O nome é obrigatório.' : null),
+              _buildTextField(
+                "Digite seu nome",
+                _nameController,
+                (value) => value!.isEmpty ? 'O nome é obrigatório.' : null,
+              ),
               const SizedBox(height: 20),
 
               // Email
-              const Text("Email *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Email *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu email", _emailController, (value) {
-                if (value!.isEmpty || !value.contains('@')) {
-                  return 'Insira um email válido.';
-                }
-                return null;
-              }, type: TextInputType.emailAddress),
+              _buildTextField(
+                "Digite seu email",
+                _emailController,
+                (value) {
+                  if (value!.isEmpty || !value.contains('@')) {
+                    return 'Insira um email válido.';
+                  }
+                  return null;
+                },
+                type: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 20),
 
               // Data de Nascimento
-              const Text("Data de Nascimento *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Data de Nascimento *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       decoration: _dropDownDecoration("Dia"),
-                      value: _selectedDay,
+                      initialValue: _selectedDay,
                       items: List.generate(31, (i) => i + 1)
-                          .map((day) => DropdownMenuItem(
-                                value: day,
-                                child: Text(day.toString()),
-                              ))
+                          .map(
+                            (day) => DropdownMenuItem(
+                              value: day,
+                              child: Text(day.toString()),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedDay = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedDay = value),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: _dropDownDecoration("Mês"),
-                      value: _selectedMonth,
+                      initialValue: _selectedMonth,
                       items: _monthMap.keys
-                          .map((month) => DropdownMenuItem(
-                                value: month,
-                                child: Text(month),
-                              ))
+                          .map(
+                            (month) => DropdownMenuItem(
+                              value: month,
+                              child: Text(month),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedMonth = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedMonth = value),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       decoration: _dropDownDecoration("Ano"),
-                      value: _selectedYear,
+                      initialValue: _selectedYear,
                       items: List.generate(100, (i) => DateTime.now().year - i)
-                          .map((year) => DropdownMenuItem(
-                                value: year,
-                                child: Text(year.toString()),
-                              ))
+                          .map(
+                            (year) => DropdownMenuItem(
+                              value: year,
+                              child: Text(year.toString()),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedYear = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedYear = value),
                     ),
                   ),
                 ],
@@ -281,27 +350,33 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
               const SizedBox(height: 20),
 
               // Gênero
-              const Text("Gênero *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Gênero *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               Row(
                 children: [
                   Radio<String>(
                     value: "F",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Feminino"),
                   Radio<String>(
                     value: "M",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Masculino"),
                   Radio<String>(
                     value: "O",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Outro"),
@@ -311,30 +386,63 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
               const SizedBox(height: 20),
 
               // Telefone
-              const Text("Telefone", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Telefone",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu telefone", _phoneController, (value) => null, type: TextInputType.phone),
+              _buildTextField(
+                "Digite seu telefone",
+                _phoneController,
+                (value) => null,
+                type: TextInputType.phone,
+              ),
 
               const SizedBox(height: 20),
 
               // Endereço
-              const Text("Endereço", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Endereço",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu endereço", _addressController, (value) => null),
+              _buildTextField(
+                "Digite seu endereço",
+                _addressController,
+                (value) => null,
+              ),
 
               const SizedBox(height: 20),
 
               // Senha
-              const Text("Senha *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Senha *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite sua senha", _passwordController, (value) => value!.length < 6 ? 'A senha deve ter pelo menos 6 caracteres.' : null, isPassword: true),
+              _buildTextField(
+                "Digite sua senha",
+                _passwordController,
+                (value) => value!.length < 6
+                    ? 'A senha deve ter pelo menos 6 caracteres.'
+                    : null,
+                isPassword: true,
+              ),
 
               const SizedBox(height: 20),
 
               // Confirme sua senha
-              const Text("Confirme sua senha *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Confirme sua senha *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Repita sua senha", _confirmPasswordController, (value) => value!.isEmpty ? 'Confirme sua senha.' : null, isPassword: true),
+              _buildTextField(
+                "Repita sua senha",
+                _confirmPasswordController,
+                (value) => value!.isEmpty ? 'Confirme sua senha.' : null,
+                isPassword: true,
+              ),
 
               const SizedBox(height: 40),
 
@@ -354,12 +462,12 @@ class _RegistraofamiliarState extends State<Registraofamiliar> {
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
-                    : const Text(
-                        "Cadastrar",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                    : const Text("Cadastrar", style: TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 40),
             ],

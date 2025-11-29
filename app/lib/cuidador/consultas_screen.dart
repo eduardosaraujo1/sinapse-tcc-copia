@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 // =======================
 // 1. MODELOS DE DADOS
@@ -63,11 +66,15 @@ class Paciente {
   factory Paciente.fromJson(Map<String, dynamic> json) {
     final consultasJson = json['consultas'] as List? ?? [];
     return Paciente(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       nome: json['nome']?.toString() ?? 'Nome não informado',
       tipoSanguineo: json['tipo_sanguineo']?.toString(),
       comorbidade: json['comorbidade']?.toString(),
-      idade: json['idade'] is int ? json['idade'] : int.tryParse(json['idade'].toString()),
+      idade: json['idade'] is int
+          ? json['idade']
+          : int.tryParse(json['idade'].toString()),
       consultas: consultasJson.map((c) => Consulta.fromJson(c)).toList(),
     );
   }
@@ -116,7 +123,7 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
     try {
       print('🔍 Iniciando busca de pacientes...');
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteComConsulta'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComConsulta'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -131,7 +138,9 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
         List<Paciente> pacientesList = [];
 
         if (responseData is List) {
-          pacientesList = responseData.map<Paciente>((json) => Paciente.fromJson(json)).toList();
+          pacientesList = responseData
+              .map<Paciente>((json) => Paciente.fromJson(json))
+              .toList();
         } else if (responseData is Map && responseData['data'] is List) {
           pacientesList = (responseData['data'] as List)
               .map<Paciente>((json) => Paciente.fromJson(json))
@@ -153,7 +162,9 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
         print('✅ ${pacientesList.length} pacientes carregados com sucesso');
         return pacientesList;
       } else {
-        throw Exception('Falha ao carregar pacientes. Código: ${response.statusCode}');
+        throw Exception(
+          'Falha ao carregar pacientes. Código: ${response.statusCode}',
+        );
       }
     } catch (e) {
       print('❌ Erro ao buscar pacientes: $e');
@@ -171,11 +182,11 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
   Future<void> _atualizarStatusConsulta(String id, String status) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/api/consulta/$id/status'),
+        Uri.parse('${Config.apiUrl}/api/consulta/$id/status'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'status': status}),
       );
-      
+
       if (response.statusCode == 200) {
         _refreshData(); // Recarrega os dados
         _mostrarSucessoSnackbar('Status atualizado com sucesso!');
@@ -189,19 +200,13 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
 
   void _mostrarErroSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
   void _mostrarSucessoSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.green),
     );
   }
 
@@ -216,7 +221,8 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
       } else {
         _filteredPacientes = _allPacientes.where((paciente) {
           return paciente.nome.toLowerCase().contains(query) ||
-              (paciente.tipoSanguineo?.toLowerCase().contains(query) ?? false) ||
+              (paciente.tipoSanguineo?.toLowerCase().contains(query) ??
+                  false) ||
               (paciente.comorbidade?.toLowerCase().contains(query) ?? false);
         }).toList();
       }
@@ -249,7 +255,9 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      paciente.nome.isNotEmpty ? paciente.nome[0].toUpperCase() : '?',
+                      paciente.nome.isNotEmpty
+                          ? paciente.nome[0].toUpperCase()
+                          : '?',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -272,18 +280,25 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      _buildInfoRow('👤', 'Idade: ${paciente.idade ?? "N/A"} anos'),
-                      _buildInfoRow('🩸', 'Tipo Sanguíneo: ${paciente.tipoSanguineo ?? "N/A"}'),
+                      _buildInfoRow(
+                        '👤',
+                        'Idade: ${paciente.idade ?? "N/A"} anos',
+                      ),
+                      _buildInfoRow(
+                        '🩸',
+                        'Tipo Sanguíneo: ${paciente.tipoSanguineo ?? "N/A"}',
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Comorbidade
-            if (paciente.comorbidade != null && paciente.comorbidade!.isNotEmpty)
+            if (paciente.comorbidade != null &&
+                paciente.comorbidade!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -293,7 +308,10 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
                     Expanded(
                       child: Text(
                         'Comorbidade: ${paciente.comorbidade}',
-                        style: const TextStyle(color: Colors.black54, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -370,9 +388,9 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // Lista de consultas
-        ...consultas.map((consulta) => _buildConsultaCard(consulta)).toList(),
+        ...consultas.map((consulta) => _buildConsultaCard(consulta)),
       ],
     );
   }
@@ -387,7 +405,9 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
       decoration: BoxDecoration(
         color: _getStatusColor(consulta.status).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _getStatusColor(consulta.status).withOpacity(0.3)),
+        border: Border.all(
+          color: _getStatusColor(consulta.status).withOpacity(0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +430,10 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(consulta.status),
                       borderRadius: BorderRadius.circular(12),
@@ -437,14 +460,14 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          
+
           // Médico
           Text(
             '👨‍⚕️ Dr. ${consulta.medicoNome} (CRM: ${consulta.crmMedico})',
             style: const TextStyle(fontSize: 12, color: Colors.black54),
             overflow: TextOverflow.ellipsis,
           ),
-          
+
           // Local e Horário
           Row(
             children: [
@@ -466,7 +489,7 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
               ),
             ],
           ),
-          
+
           // Especialidade
           if (consulta.especialidade.isNotEmpty)
             Padding(
@@ -612,7 +635,10 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 106, 186, 213),
             ),
-            child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Tentar Novamente',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -666,7 +692,10 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 20.0,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -692,7 +721,8 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
               child: FutureBuilder<List<Paciente>>(
                 future: _pacientesFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting && !_isLoading) {
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      !_isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return _buildErrorWidget();
@@ -701,7 +731,11 @@ class _ConsultasScreenState extends State<ConsultasScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.people_outline, size: 64, color: Colors.grey),
+                          Icon(
+                            Icons.people_outline,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
                           SizedBox(height: 16),
                           Text(
                             'Nenhum paciente encontrado',

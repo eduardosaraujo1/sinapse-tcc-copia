@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class ConsultasFamiliar extends StatefulWidget {
   const ConsultasFamiliar({super.key});
@@ -31,9 +34,9 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
       });
 
       print('🔄 Iniciando carregamento de consultas...');
-      
+
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteComConsulta'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComConsulta'),
       );
 
       print('📡 Status da resposta: ${response.statusCode}');
@@ -41,10 +44,10 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         print('✅ API retornou success: ${data['success']}');
         print('📊 Total de pacientes: ${data['data']?.length}');
-        
+
         if (data['success'] == true) {
           // Debug: Verificar estrutura dos dados
           if (data['data'] != null && data['data'].isNotEmpty) {
@@ -52,13 +55,15 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
             print('Nome: ${data['data'][0]['nome']}');
             print('Tem consultas: ${data['data'][0]['consultas'] != null}');
             if (data['data'][0]['consultas'] != null) {
-              print('Número de consultas: ${data['data'][0]['consultas'].length}');
+              print(
+                'Número de consultas: ${data['data'][0]['consultas'].length}',
+              );
               if (data['data'][0]['consultas'].isNotEmpty) {
                 print('Primeira consulta: ${data['data'][0]['consultas'][0]}');
               }
             }
           }
-          
+
           setState(() {
             pacientesComConsultas = data['data'];
             pacientesFiltrados = List.from(pacientesComConsultas);
@@ -92,14 +97,27 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
       } else {
         pacientesFiltrados = pacientesComConsultas.where((paciente) {
           final nome = paciente['nome']?.toString().toLowerCase() ?? '';
-          final especialidade = paciente['consultas']?.any((consulta) => 
-            consulta['especialidade']?.toString().toLowerCase().contains(query.toLowerCase()) ?? false
-          ) ?? false;
-          final medico = paciente['consultas']?.any((consulta) => 
-            consulta['medico_nome']?.toString().toLowerCase().contains(query.toLowerCase()) ?? false
-          ) ?? false;
+          final especialidade =
+              paciente['consultas']?.any(
+                (consulta) =>
+                    consulta['especialidade']
+                        ?.toString()
+                        .toLowerCase()
+                        .contains(query.toLowerCase()) ??
+                    false,
+              ) ??
+              false;
+          final medico =
+              paciente['consultas']?.any(
+                (consulta) =>
+                    consulta['medico_nome']?.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ??
+                    false,
+              ) ??
+              false;
           final searchLower = query.toLowerCase();
-          
+
           return nome.contains(searchLower) || especialidade || medico;
         }).toList();
       }
@@ -170,43 +188,31 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
               const SizedBox(width: 8),
               Text(
                 _getTipoConsulta(consulta['tipo_consulta']),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            consulta['especialidade']?.toString() ?? 'Especialidade não informada',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            consulta['especialidade']?.toString() ??
+                'Especialidade não informada',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           Text(
             'Dr. ${consulta['medico_nome'] ?? 'Médico não informado'}',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
           ),
           if (consulta['crm_medico'] != null)
             Text(
               'CRM: ${consulta['crm_medico']}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           const SizedBox(height: 4),
           Text(
-            consulta['local_consulta'] ?? consulta['endereco_consulta'] ?? 'Local não informado',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            consulta['local_consulta'] ??
+                consulta['endereco_consulta'] ??
+                'Local não informado',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
           const SizedBox(height: 4),
           Text(
@@ -251,7 +257,9 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                 prefixIcon: const Icon(Icons.search),
                 hintText: 'Buscar paciente, especialidade ou médico...',
                 contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 16.0),
+                  vertical: 16.0,
+                  horizontal: 16.0,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                   borderSide: BorderSide.none,
@@ -271,7 +279,7 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
               onChanged: _filtrarConsultas,
             ),
             const SizedBox(height: 20),
-            
+
             if (isLoading)
               const Expanded(
                 child: Center(
@@ -291,18 +299,11 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
+                      Icon(Icons.error_outline, size: 64, color: Colors.red),
                       SizedBox(height: 16),
                       Text(
                         errorMessage,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.red, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16),
@@ -330,10 +331,7 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                         _searchController.text.isEmpty
                             ? 'Nenhuma consulta agendada'
                             : 'Nenhuma consulta encontrada para a busca',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -346,10 +344,13 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                   itemCount: pacientesFiltrados.length,
                   itemBuilder: (context, index) {
                     final paciente = pacientesFiltrados[index];
-                    final consultas = paciente['consultas'] as List<dynamic>? ?? [];
-                    
-                    print('🎯 Renderizando paciente: ${paciente['nome']} com ${consultas.length} consultas');
-                    
+                    final consultas =
+                        paciente['consultas'] as List<dynamic>? ?? [];
+
+                    print(
+                      '🎯 Renderizando paciente: ${paciente['nome']} com ${consultas.length} consultas',
+                    );
+
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.only(bottom: 15),
@@ -366,7 +367,11 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                               radius: 25,
                               backgroundColor: Colors.blue[100],
                               child: Text(
-                                paciente['nome']?.toString().substring(0, 1).toUpperCase() ?? '?',
+                                paciente['nome']
+                                        ?.toString()
+                                        .substring(0, 1)
+                                        .toUpperCase() ??
+                                    '?',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue,
@@ -374,7 +379,8 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                               ),
                             ),
                             title: Text(
-                              paciente['nome']?.toString() ?? 'Paciente não identificado',
+                              paciente['nome']?.toString() ??
+                                  'Paciente não identificado',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -386,7 +392,9 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                                 if (paciente['idade'] != null)
                                   Text('Idade: ${paciente['idade']} anos'),
                                 if (paciente['tipo_sanguineo'] != null)
-                                  Text('Tipo Sanguíneo: ${paciente['tipo_sanguineo']}'),
+                                  Text(
+                                    'Tipo Sanguíneo: ${paciente['tipo_sanguineo']}',
+                                  ),
                                 Text(
                                   '${consultas.length} consulta(s)',
                                   style: TextStyle(
@@ -397,13 +405,15 @@ class _ConsultasFamiliarState extends State<ConsultasFamiliar> {
                               ],
                             ),
                           ),
-                          
+
                           // Lista de consultas do paciente
                           if (consultas.isNotEmpty)
                             ...consultas.map((consulta) {
-                              print('📅 Renderizando consulta: ${consulta['especialidade']}');
+                              print(
+                                '📅 Renderizando consulta: ${consulta['especialidade']}',
+                              );
                               return _buildConsultaCard(consulta);
-                            }).toList()
+                            })
                           else
                             const Padding(
                               padding: EdgeInsets.all(16.0),

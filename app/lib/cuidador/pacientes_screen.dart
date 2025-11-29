@@ -1,12 +1,11 @@
-import 'package:algumacoisa/cuidador/addfamiliar.dart';
-import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
-import 'package:algumacoisa/cuidador/perfilpaciente.dart';
+import 'dart:convert';
+
+import 'package:algumacoisa/familiar/Registraofamiliar.dart';
 import 'package:algumacoisa/paciente/acesso_paciente.dart';
 import 'package:flutter/material.dart';
-import 'adicionar_paciente_screen.dart';
-import 'package:algumacoisa/familiar/Registraofamiliar.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class PacientesScreen extends StatefulWidget {
   const PacientesScreen({super.key});
@@ -29,7 +28,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
   Future<void> _carregarPacientes() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/ExibirPacientes'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/ExibirPacientes'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -38,7 +37,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
 
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
-        
+
         if (decodedResponse['success'] == true) {
           setState(() {
             pacientes = decodedResponse['data'];
@@ -46,7 +45,8 @@ class _PacientesScreenState extends State<PacientesScreen> {
           });
         } else {
           setState(() {
-            errorMessage = 'Erro na resposta da API: ${decodedResponse['error']}';
+            errorMessage =
+                'Erro na resposta da API: ${decodedResponse['error']}';
             isLoading = false;
           });
         }
@@ -66,7 +66,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
 
   // Função para obter a letra inicial do nome do paciente
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -82,9 +82,9 @@ class _PacientesScreenState extends State<PacientesScreen> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -100,7 +100,9 @@ class _PacientesScreenState extends State<PacientesScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => RegistraPacienteScreen()),
+                MaterialPageRoute(
+                  builder: (context) => RegistraPacienteScreen(),
+                ),
               ).then((_) => _carregarPacientes());
             },
             child: Text('Adicionar', style: TextStyle(color: Colors.lightBlue)),
@@ -112,14 +114,14 @@ class _PacientesScreenState extends State<PacientesScreen> {
                 MaterialPageRoute(builder: (context) => Registraofamiliar()),
               );
             },
-            child: Text('Adicionar Familiar', style: TextStyle(color: Colors.lightBlue)),
+            child: Text(
+              'Adicionar Familiar',
+              style: TextStyle(color: Colors.lightBlue),
+            ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _buildBody(),
-      ),
+      body: Padding(padding: const EdgeInsets.all(16.0), child: _buildBody()),
     );
   }
 
@@ -155,7 +157,9 @@ class _PacientesScreenState extends State<PacientesScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegistraPacienteScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => RegistraPacienteScreen(),
+                  ),
                 ).then((_) => _carregarPacientes());
               },
               child: Text('Cadastrar Primeiro Paciente'),
@@ -171,10 +175,7 @@ class _PacientesScreenState extends State<PacientesScreen> {
         itemCount: pacientes.length,
         itemBuilder: (context, index) {
           final paciente = pacientes[index];
-          return _buildPatientCard(
-            context,
-            paciente: paciente,
-          );
+          return _buildPatientCard(context, paciente: paciente);
         },
       ),
     );
@@ -222,7 +223,6 @@ class _PacientesScreenState extends State<PacientesScreen> {
                 ],
               ),
             ),
-          
           ],
         ),
       ),

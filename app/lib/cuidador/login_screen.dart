@@ -1,18 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'register_step2_screen.dart';
-import 'package:algumacoisa/paciente/home_paciente.dart';
 import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
 import 'package:algumacoisa/familiar/home_familiar.dart';
-import 'package:algumacoisa/cuidador/register_step1_screen.dart';
+import 'package:algumacoisa/paciente/home_paciente.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'create_password_screen.dart';
+import 'register_step2_screen.dart';
 
 // URLs das APIs
-const String loginCuidadorUrl = 'http://localhost:8000/api/cuidador/login';
-const String loginFamiliarUrl = 'http://localhost:8000/api/familiar/login';
-const String loginPacienteUrl = 'http://localhost:8000/api/paciente/login'; // Se tiver
+const String loginCuidadorUrl = '${Config.apiUrl}/api/cuidador/login';
+const String loginFamiliarUrl = '${Config.apiUrl}/api/familiar/login';
+const String loginPacienteUrl =
+    '${Config.apiUrl}/api/paciente/login'; // Se tiver
 
 class LoginUnificadoScreen extends StatefulWidget {
   const LoginUnificadoScreen({super.key});
@@ -22,7 +24,8 @@ class LoginUnificadoScreen extends StatefulWidget {
 }
 
 class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
-  final TextEditingController _identificadorController = TextEditingController();
+  final TextEditingController _identificadorController =
+      TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -85,10 +88,11 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
           _redirecionarPorTipo(userType, userData);
         } else {
           // Todas as tentativas falharam
-          _mostrarSnackBar('Credenciais inválidas para todos os tipos de usuário');
+          _mostrarSnackBar(
+            'Credenciais inválidas para todos os tipos de usuário',
+          );
         }
       }
-
     } catch (e) {
       if (mounted) {
         print('Erro de conexão: $e');
@@ -104,15 +108,16 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
   }
 
   // --- TENTA LOGIN EM UM ENDPOINT ESPECÍFICO ---
-  Future<Map<String, dynamic>?> _tentarLogin(String url, String identificador, String senha) async {
+  Future<Map<String, dynamic>?> _tentarLogin(
+    String url,
+    String identificador,
+    String senha,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'identificador': identificador,
-          'senha': senha,
-        }),
+        body: json.encode({'identificador': identificador, 'senha': senha}),
       );
 
       if (response.statusCode == 200) {
@@ -126,37 +131,37 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
 
   // --- REDIRECIONA CONFORME O TIPO DE USUÁRIO ---
   void _redirecionarPorTipo(String userType, Map<String, dynamic> userData) {
-  switch (userType) {
-    case 'cuidador':
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeCuidadorScreen(), // Sem parâmetros
-        ),
-      );
-      break;
+    switch (userType) {
+      case 'cuidador':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeCuidadorScreen(), // Sem parâmetros
+          ),
+        );
+        break;
 
-    case 'familiar':
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeFamiliar(), // Sem parâmetros
-        ),
-      );
-      break;
+      case 'familiar':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeFamiliar(), // Sem parâmetros
+          ),
+        );
+        break;
 
-    case 'paciente':
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePaciente(), // Sem parâmetros
-        ),
-      );
-      break;
+      case 'paciente':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePaciente(), // Sem parâmetros
+          ),
+        );
+        break;
+    }
+
+    _mostrarSnackBar('Bem-vindo!', isError: false);
   }
-  
-  _mostrarSnackBar('Bem-vindo!', isError: false);
-}
 
   void _mostrarSnackBar(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -188,7 +193,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Título
                 const Text(
                   "Login",
@@ -198,14 +203,14 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     color: corPrincipal,
                   ),
                 ),
-                
+
                 const SizedBox(height: 10),
-                
+
                 // Logo
                 Image.asset('assets/image-removebg-preview.png', height: 100),
-                
+
                 const SizedBox(height: 10),
-                
+
                 // Subtítulo
                 const Text(
                   "Bem-Vindo!",
@@ -216,15 +221,15 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     color: Colors.blueGrey,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 const Text(
                   "Digite seus dados de acesso",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey),
                 ),
-                
+
                 const SizedBox(height: 30),
 
                 // Campo de Email/Telefone
@@ -249,7 +254,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     prefixIcon: const Icon(Icons.person, color: corPrincipal),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Campo de Senha
@@ -276,7 +281,9 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     prefixIcon: const Icon(Icons.lock, color: corPrincipal),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: corPrincipal,
                       ),
                       onPressed: () {
@@ -285,7 +292,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 10),
 
                 // Esqueceu senha
@@ -294,8 +301,10 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (_) => const CreatePasswordScreen())
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CreatePasswordScreen(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -304,7 +313,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Botão Login
@@ -338,7 +347,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                           ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
 
                 // Divisor
@@ -355,7 +364,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     Expanded(child: Divider(color: Colors.grey[300])),
                   ],
                 ),
-                
+
                 const SizedBox(height: 30),
 
                 // Botão Cadastrar
@@ -365,7 +374,9 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => RegisterStep2Screen()),
+                        MaterialPageRoute(
+                          builder: (_) => RegisterStep2Screen(),
+                        ),
                       );
                     },
                     style: OutlinedButton.styleFrom(
@@ -385,7 +396,7 @@ class _LoginUnificadoScreenState extends State<LoginUnificadoScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
               ],
             ),

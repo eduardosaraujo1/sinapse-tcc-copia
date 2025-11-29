@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class EditarPerfilPaciente extends StatefulWidget {
   final Map<String, dynamic> perfilData;
@@ -29,11 +32,21 @@ class _EditarPerfilPacienteState extends State<EditarPerfilPaciente> {
   @override
   void initState() {
     super.initState();
-    _nomeController = TextEditingController(text: widget.perfilData['nome'] ?? '');
-    _tipoSanguineoController = TextEditingController(text: widget.perfilData['tipo_sanguineo'] ?? '');
-    _idadeController = TextEditingController(text: widget.perfilData['idade']?.toString() ?? '');
-    _pesoController = TextEditingController(text: widget.perfilData['peso']?.toString() ?? '');
-    _comorbidadeController = TextEditingController(text: widget.perfilData['comorbidade'] ?? '');
+    _nomeController = TextEditingController(
+      text: widget.perfilData['nome'] ?? '',
+    );
+    _tipoSanguineoController = TextEditingController(
+      text: widget.perfilData['tipo_sanguineo'] ?? '',
+    );
+    _idadeController = TextEditingController(
+      text: widget.perfilData['idade']?.toString() ?? '',
+    );
+    _pesoController = TextEditingController(
+      text: widget.perfilData['peso']?.toString() ?? '',
+    );
+    _comorbidadeController = TextEditingController(
+      text: widget.perfilData['comorbidade'] ?? '',
+    );
   }
 
   @override
@@ -60,38 +73,46 @@ class _EditarPerfilPacienteState extends State<EditarPerfilPaciente> {
     try {
       final Map<String, dynamic> dadosAtualizacao = {
         'nome': _nomeController.text.trim(),
-        'tipo_sanguineo': _tipoSanguineoController.text.trim().isEmpty ? null : _tipoSanguineoController.text.trim(),
-        'idade': _idadeController.text.trim().isEmpty ? null : int.tryParse(_idadeController.text.trim()),
-        'peso': _pesoController.text.trim().isEmpty ? null : double.tryParse(_pesoController.text.trim()),
-        'comorbidade': _comorbidadeController.text.trim().isEmpty ? null : _comorbidadeController.text.trim(),
+        'tipo_sanguineo': _tipoSanguineoController.text.trim().isEmpty
+            ? null
+            : _tipoSanguineoController.text.trim(),
+        'idade': _idadeController.text.trim().isEmpty
+            ? null
+            : int.tryParse(_idadeController.text.trim()),
+        'peso': _pesoController.text.trim().isEmpty
+            ? null
+            : double.tryParse(_pesoController.text.trim()),
+        'comorbidade': _comorbidadeController.text.trim().isEmpty
+            ? null
+            : _comorbidadeController.text.trim(),
       };
 
       final response = await http.put(
-        Uri.parse('http://localhost:8000/api/paciente/atualizar-perfil'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('${Config.apiUrl}/api/paciente/atualizar-perfil'),
+        headers: {'Content-Type': 'application/json'},
         body: json.encode(dadosAtualizacao),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        
+
         if (responseData['success'] == true) {
           setState(() {
-            _successMessage = responseData['message'] ?? 'Perfil atualizado com sucesso!';
+            _successMessage =
+                responseData['message'] ?? 'Perfil atualizado com sucesso!';
           });
-          
+
           // Aguarda um pouco para mostrar a mensagem de sucesso antes de voltar
           await Future.delayed(const Duration(seconds: 1));
-          
+
           // Retorna para a tela anterior com os dados atualizados
           if (mounted) {
             Navigator.pop(context, dadosAtualizacao);
           }
         } else {
           setState(() {
-            _errorMessage = responseData['message'] ?? 'Erro ao atualizar perfil';
+            _errorMessage =
+                responseData['message'] ?? 'Erro ao atualizar perfil';
           });
         }
       } else {
@@ -159,7 +180,7 @@ class _EditarPerfilPacienteState extends State<EditarPerfilPaciente> {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                
+
                 if (_successMessage.isNotEmpty)
                   Container(
                     width: double.infinity,
@@ -310,10 +331,7 @@ class _EditarPerfilPacienteState extends State<EditarPerfilPaciente> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -322,9 +340,7 @@ class _EditarPerfilPacienteState extends State<EditarPerfilPaciente> {
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,

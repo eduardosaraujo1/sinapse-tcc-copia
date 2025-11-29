@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class SentimentosScreen extends StatefulWidget {
   const SentimentosScreen({super.key});
@@ -23,7 +26,7 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
   Future<void> _carregarSentimentos() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/ExibirPacientes'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/ExibirPacientes'),
       );
 
       if (response.statusCode == 200) {
@@ -48,10 +51,7 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
 
   void _mostrarErroSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
@@ -128,7 +128,7 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
@@ -158,11 +158,7 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
         child: Column(
           children: <Widget>[
             if (isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              )
+              Expanded(child: Center(child: CircularProgressIndicator()))
             else if (hasError)
               Expanded(
                 child: Center(
@@ -190,7 +186,11 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.sentiment_neutral, size: 64, color: Colors.grey),
+                      Icon(
+                        Icons.sentiment_neutral,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
                       SizedBox(height: 16),
                       Text(
                         'Nenhum sentimento registrado',
@@ -215,9 +215,12 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                     itemBuilder: (context, index) {
                       final sentimento = sentimentos[index];
                       final nome = sentimento['nome'] ?? 'Nome não informado';
-                      final sentimentoTipo = sentimento['sentimento'] ?? 'Neutro';
+                      final sentimentoTipo =
+                          sentimento['sentimento'] ?? 'Neutro';
                       final descricao = sentimento['descricao'];
-                      final dataRegistro = sentimento['data_registro'] ?? sentimento['created_at'];
+                      final dataRegistro =
+                          sentimento['data_registro'] ??
+                          sentimento['created_at'];
                       final idade = sentimento['idade'];
                       final comorbidade = sentimento['comorbidade'];
 
@@ -262,7 +265,11 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                                           ),
                                         ],
                                       ),
-                                      child: Icon(icon, color: iconColor, size: 16),
+                                      child: Icon(
+                                        icon,
+                                        color: iconColor,
+                                        size: 16,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -282,12 +289,28 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                                     if (idade != null)
                                       Text(
                                         '$idade anos',
-                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 12),
+                                        style: TextStyle(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            0,
+                                            0,
+                                            0,
+                                          ),
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     if (comorbidade != null)
                                       Text(
                                         comorbidade,
-                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 12),
+                                        style: TextStyle(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            0,
+                                            0,
+                                            0,
+                                          ),
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     SizedBox(height: 4),
                                     Text(
@@ -297,9 +320,11 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    if (descricao != null && descricao.isNotEmpty)
+                                    if (descricao != null &&
+                                        descricao.isNotEmpty)
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           SizedBox(height: 4),
                                           Text(
@@ -314,7 +339,11 @@ class _SentimentosScreenState extends State<SentimentosScreen> {
                                     SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 12,
+                                          color: Colors.grey,
+                                        ),
                                         SizedBox(width: 4),
                                         Text(
                                           _formatarData(dataRegistro),

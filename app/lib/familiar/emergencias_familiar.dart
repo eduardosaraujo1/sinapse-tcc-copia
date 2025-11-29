@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 
 class EmergenciasScreen extends StatefulWidget {
   const EmergenciasScreen({super.key});
@@ -23,7 +26,7 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
   Future<void> _fetchPacientes() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/ExibirPacientes'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/ExibirPacientes'),
       );
 
       if (response.statusCode == 200) {
@@ -61,17 +64,17 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color.fromARGB(255, 0, 0, 0)),
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: const Text(
           'Emergências',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -111,15 +114,16 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
                     child: const TextField(
                       decoration: InputDecoration(
                         hintText: 'Buscar pacientes',
-                        prefixIcon: Icon(Icons.search, color: Color(0xFF6ABAD5),),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Color(0xFF6ABAD5),
+                        ),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Expanded(
-                    child: _buildContent(),
-                  ),
+                  Expanded(child: _buildContent()),
                 ],
               ),
             ),
@@ -131,9 +135,7 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
 
   Widget _buildContent() {
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (errorMessage.isNotEmpty) {
@@ -162,14 +164,16 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
         return _buildEmergencyCard(
           context,
           name: paciente['nome'] ?? 'Nome não informado',
-          details: 'Idade: ${paciente['idade'] ?? 'Não informada'}\n${paciente['comorbidade'] ?? 'Sem comorbidades'}',
+          details:
+              'Idade: ${paciente['idade'] ?? 'Não informada'}\n${paciente['comorbidade'] ?? 'Sem comorbidades'}',
           paciente: paciente,
         );
       },
     );
   }
 
-  Widget _buildEmergencyCard(BuildContext context, {
+  Widget _buildEmergencyCard(
+    BuildContext context, {
     required String name,
     required String details,
     required dynamic paciente,
@@ -190,11 +194,7 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              const Icon(
-                Icons.warning,
-                color: Colors.red,
-                size: 40,
-              ),
+              const Icon(Icons.warning, color: Colors.red, size: 40),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -218,10 +218,7 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.arrow_forward_ios, color: Colors.grey),
             ],
           ),
         ),
@@ -234,7 +231,9 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
           elevation: 10,
           child: Container(
             decoration: BoxDecoration(
@@ -245,7 +244,9 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                   child: Container(
                     color: const Color(0xFFFFF0F5),
                     padding: const EdgeInsets.all(20),
@@ -296,10 +297,18 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text('Idade: ${paciente['idade'] ?? 'Não informada'}'),
-                            Text('Peso: ${paciente['peso'] ?? 'Não informado'}'),
-                            Text('Tipo Sanguíneo: ${paciente['tipo_sanguineo'] ?? 'Não informado'}'),
-                            Text('Comorbidades: ${paciente['comorbidade'] ?? 'Nenhuma'}'),
+                            Text(
+                              'Idade: ${paciente['idade'] ?? 'Não informada'}',
+                            ),
+                            Text(
+                              'Peso: ${paciente['peso'] ?? 'Não informado'}',
+                            ),
+                            Text(
+                              'Tipo Sanguíneo: ${paciente['tipo_sanguineo'] ?? 'Não informado'}',
+                            ),
+                            Text(
+                              'Comorbidades: ${paciente['comorbidade'] ?? 'Nenhuma'}',
+                            ),
                           ],
                         ),
                       ),
@@ -314,7 +323,10 @@ class _EmergenciasScreenState extends State<EmergenciasScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 15,
+                          ),
                         ),
                         child: const Text('Verificar'),
                       ),

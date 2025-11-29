@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'notificacao_medicamento.dart';
+
+import '../config.dart';
 import 'agendar_medicamento_screen.dart';
+import 'notificacao_medicamento.dart';
 
 class ConfirmarAgendamentoMedicamentoScreen extends StatefulWidget {
   final String patientName;
@@ -21,10 +24,12 @@ class ConfirmarAgendamentoMedicamentoScreen extends StatefulWidget {
   });
 
   @override
-  State<ConfirmarAgendamentoMedicamentoScreen> createState() => _ConfirmarAgendamentoMedicamentoScreenState();
+  State<ConfirmarAgendamentoMedicamentoScreen> createState() =>
+      _ConfirmarAgendamentoMedicamentoScreenState();
 }
 
-class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendamentoMedicamentoScreen> {
+class _ConfirmarAgendamentoMedicamentoScreenState
+    extends State<ConfirmarAgendamentoMedicamentoScreen> {
   late TextEditingController _medicationNameController;
   late TextEditingController _dosageController;
   bool _isLoading = false;
@@ -32,7 +37,9 @@ class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendam
   @override
   void initState() {
     super.initState();
-    _medicationNameController = TextEditingController(text: widget.medicationName);
+    _medicationNameController = TextEditingController(
+      text: widget.medicationName,
+    );
     _dosageController = TextEditingController(text: widget.dosage);
   }
 
@@ -45,78 +52,95 @@ class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendam
 
   String _getDayName(int weekday) {
     const dayNames = [
-      'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 
-      'Sexta-feira', 'Sábado', 'Domingo'
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
+      'Domingo',
     ];
     return dayNames[weekday - 1];
   }
 
   String _getMonthName(int month) {
     const monthNames = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     return monthNames[month - 1];
   }
 
- Future<void> _saveMedicationToDatabase() async {
-  if (_medicationNameController.text.isEmpty || _dosageController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Preencha todos os campos')),
-    );
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/api/medicamentos'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'patient_name': widget.patientName,
-        'medication_name': _medicationNameController.text,
-        'dosage': _dosageController.text,
-        'date': widget.date.toIso8601String(),
-        'time': widget.time,
-        'cuidador_id': 1 // ← ADICIONE O ID DO CUIDADOR AQUI
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      // Navega para tela de confirmação
-      Navigator.pushReplacement(
+  Future<void> _saveMedicationToDatabase() async {
+    if (_medicationNameController.text.isEmpty ||
+        _dosageController.text.isEmpty) {
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(
-          builder: (context) => ConfirmacaoMedicamentos(
-            medicationName: _medicationNameController.text,
-            dosage: _dosageController.text,
-            date: widget.date,
-            time: widget.time,
-            patientName: widget.patientName,
-          ),
-        ),
-      );
-    } else {
-      final errorData = json.decode(response.body);
-      throw Exception(errorData['error'] ?? 'Erro ao salvar medicamento');
+      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
+      return;
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Erro: $e')),
-    );
-  } finally {
+
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
+
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.apiUrl}/api/medicamentos'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'patient_name': widget.patientName,
+          'medication_name': _medicationNameController.text,
+          'dosage': _dosageController.text,
+          'date': widget.date.toIso8601String(),
+          'time': widget.time,
+          'cuidador_id': 1, // ← ADICIONE O ID DO CUIDADOR AQUI
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        // Navega para tela de confirmação
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConfirmacaoMedicamentos(
+              medicationName: _medicationNameController.text,
+              dosage: _dosageController.text,
+              date: widget.date,
+              time: widget.time,
+              patientName: widget.patientName,
+            ),
+          ),
+        );
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['error'] ?? 'Erro ao salvar medicamento');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = '${_getDayName(widget.date.weekday)}, ${widget.date.day} de ${_getMonthName(widget.date.month)}';
+    final formattedDate =
+        '${_getDayName(widget.date.weekday)}, ${widget.date.day} de ${_getMonthName(widget.date.month)}';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -175,12 +199,19 @@ class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendam
                 ),
               ),
               const SizedBox(height: 48),
-              _buildEditableField('Nome do Medicamento', _medicationNameController),
+              _buildEditableField(
+                'Nome do Medicamento',
+                _medicationNameController,
+              ),
               const SizedBox(height: 24),
               _buildEditableField('Dosagem', _dosageController),
               const SizedBox(height: 64),
               _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF6ABAD5)))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF6ABAD5),
+                      ),
+                    )
                   : ElevatedButton(
                       onPressed: _saveMedicationToDatabase,
                       style: ElevatedButton.styleFrom(
@@ -237,10 +268,7 @@ class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendam
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color(0xFF6ABAD5),
-              ],
+              colors: [Color(0xFFB3E5FC), Color(0xFF6ABAD5)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -276,9 +304,7 @@ class _ConfirmarAgendamentoMedicamentoScreenState extends State<ConfirmarAgendam
           ),
           child: TextField(
             controller: controller,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
+            decoration: const InputDecoration(border: InputBorder.none),
             style: const TextStyle(fontSize: 16, color: Colors.black87),
           ),
         ),

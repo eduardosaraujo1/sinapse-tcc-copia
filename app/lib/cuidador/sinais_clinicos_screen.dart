@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 import 'confirmacao_registro.dart';
 import 'selecionar_paciente_screen.dart'; // Importe onde está a classe Paciente
 
@@ -17,7 +20,8 @@ class _SinaisClinicosScreenState extends State<SinaisClinicosScreen> {
   final TextEditingController _temperaturaController = TextEditingController();
   final TextEditingController _glicemiaController = TextEditingController();
   final TextEditingController _pressaoController = TextEditingController();
-  final TextEditingController _outrasObservacoesController = TextEditingController();
+  final TextEditingController _outrasObservacoesController =
+      TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -29,69 +33,67 @@ class _SinaisClinicosScreenState extends State<SinaisClinicosScreen> {
     super.dispose();
   }
 
-Future<void> _salvarSinaisClinicos() async {
-  if (_isLoading) return;
+  Future<void> _salvarSinaisClinicos() async {
+    if (_isLoading) return;
 
-  // Validações básicas
-  if (_temperaturaController.text.isEmpty && 
-      _glicemiaController.text.isEmpty && 
-      _pressaoController.text.isEmpty) {
-    _mostrarErro('Preencha pelo menos um sinal clínico');
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    final Map<String, dynamic> requestBody = {
-      'paciente_id': widget.paciente.id,
-      'temperatura': _temperaturaController.text.isNotEmpty 
-          ? double.tryParse(_temperaturaController.text.replaceAll(',', '.')) 
-          : null,
-      'glicemia': _glicemiaController.text.isNotEmpty
-          ? double.tryParse(_glicemiaController.text.replaceAll(',', '.'))
-          : null,
-      'pressao_arterial': _pressaoController.text.isNotEmpty
-          ? _pressaoController.text
-          : null,
-      'outras_observacoes': _outrasObservacoesController.text.isNotEmpty
-          ? _outrasObservacoesController.text
-          : null,
-    };
-
-    // Remove campos nulos
-    requestBody.removeWhere((key, value) => value == null);
-
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/api/registrosdiarios/sinais-clinicos'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(requestBody),
-    );
-
-    // CORREÇÃO: Aceitar tanto 200 quanto 201 como sucesso
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      
-      if (data['success'] == true) {
-        _navegarParaConfirmacao();
-      } else {
-        _mostrarErro(data['message'] ?? 'Erro ao salvar sinais clínicos');
-      }
-    } else {
-      _mostrarErro('Erro na conexão: ${response.statusCode}');
+    // Validações básicas
+    if (_temperaturaController.text.isEmpty &&
+        _glicemiaController.text.isEmpty &&
+        _pressaoController.text.isEmpty) {
+      _mostrarErro('Preencha pelo menos um sinal clínico');
+      return;
     }
-  } catch (e) {
-    _mostrarErro('Erro: $e');
-  } finally {
+
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
+
+    try {
+      final Map<String, dynamic> requestBody = {
+        'paciente_id': widget.paciente.id,
+        'temperatura': _temperaturaController.text.isNotEmpty
+            ? double.tryParse(_temperaturaController.text.replaceAll(',', '.'))
+            : null,
+        'glicemia': _glicemiaController.text.isNotEmpty
+            ? double.tryParse(_glicemiaController.text.replaceAll(',', '.'))
+            : null,
+        'pressao_arterial': _pressaoController.text.isNotEmpty
+            ? _pressaoController.text
+            : null,
+        'outras_observacoes': _outrasObservacoesController.text.isNotEmpty
+            ? _outrasObservacoesController.text
+            : null,
+      };
+
+      // Remove campos nulos
+      requestBody.removeWhere((key, value) => value == null);
+
+      final response = await http.post(
+        Uri.parse('${Config.apiUrl}/api/registrosdiarios/sinais-clinicos'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(requestBody),
+      );
+
+      // CORREÇÃO: Aceitar tanto 200 quanto 201 como sucesso
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        if (data['success'] == true) {
+          _navegarParaConfirmacao();
+        } else {
+          _mostrarErro(data['message'] ?? 'Erro ao salvar sinais clínicos');
+        }
+      } else {
+        _mostrarErro('Erro na conexão: ${response.statusCode}');
+      }
+    } catch (e) {
+      _mostrarErro('Erro: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
 
   void _mostrarErro(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -106,9 +108,7 @@ Future<void> _salvarSinaisClinicos() async {
   void _navegarParaConfirmacao() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (context) => ConfirmacaoScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => ConfirmacaoScreen()),
       (route) => false, // Remove todas as rotas anteriores
     );
   }
@@ -138,7 +138,7 @@ Future<void> _salvarSinaisClinicos() async {
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _pularEtapa,
-            child: _isLoading 
+            child: _isLoading
                 ? SizedBox(
                     width: 20,
                     height: 20,
@@ -164,14 +164,11 @@ Future<void> _salvarSinaisClinicos() async {
                   SizedBox(height: 8),
                   Text(
                     widget.paciente.nome,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    widget.paciente.idade ?? 'Idade não informada', 
-                    style: TextStyle(color: Colors.grey)
+                    widget.paciente.idade ?? 'Idade não informada',
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -277,5 +274,5 @@ Future<void> _salvarSinaisClinicos() async {
         fillColor: Colors.grey[200],
       ),
     );
-  } 
+  }
 }

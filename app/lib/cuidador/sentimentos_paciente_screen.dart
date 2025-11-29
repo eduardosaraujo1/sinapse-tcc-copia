@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 import 'sinais_clinicos_screen.dart';
 
 class SentimentosPacienteScreen extends StatefulWidget {
@@ -9,7 +12,8 @@ class SentimentosPacienteScreen extends StatefulWidget {
   const SentimentosPacienteScreen({super.key, required this.paciente});
 
   @override
-  _SentimentosPacienteScreenState createState() => _SentimentosPacienteScreenState();
+  _SentimentosPacienteScreenState createState() =>
+      _SentimentosPacienteScreenState();
 }
 
 class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
@@ -38,16 +42,14 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
       };
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/registrosdiarios/sentimentos'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('${Config.apiUrl}/api/registrosdiarios/sentimentos'),
+        headers: {'Content-Type': 'application/json'},
         body: json.encode(requestBody),
       );
 
       if (response.statusCode == 201) {
         final Map<String, dynamic> data = json.decode(response.body);
-        
+
         if (data['success'] == true) {
           _navegarParaSinaisClinicos();
         } else {
@@ -67,21 +69,19 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
 
   void _mostrarErro(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
- void _navegarParaSinaisClinicos() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => SinaisClinicosScreen(paciente: widget.paciente), // ✅ CORRETO
-    ),
-  );
-}
+  void _navegarParaSinaisClinicos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SinaisClinicosScreen(paciente: widget.paciente), // ✅ CORRETO
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +103,10 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
         centerTitle: false,
         actions: [
           TextButton(
-            onPressed: _selectedSentiment == null || _isLoading ? null : _salvarSentimentos,
-            child: _isLoading 
+            onPressed: _selectedSentiment == null || _isLoading
+                ? null
+                : _salvarSentimentos,
+            child: _isLoading
                 ? SizedBox(
                     width: 20,
                     height: 20,
@@ -125,7 +127,11 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.grey[300],
-                    child: const Icon(Icons.person, size: 40, color: Colors.grey),
+                    child: const Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -135,18 +141,17 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(widget.paciente.idade ?? 'Idade não informada', 
-                      style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    widget.paciente.idade ?? 'Idade não informada',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Estado geral desse paciente hoje:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -181,10 +186,15 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
             const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: _selectedSentiment == null || _isLoading ? null : _salvarSentimentos,
+                onPressed: _selectedSentiment == null || _isLoading
+                    ? null
+                    : _salvarSentimentos,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF62A7D2),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 15,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

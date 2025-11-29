@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http; // Opcional, mas útil se outras lógicas de API forem adicionadas.
+// Opcional, mas útil se outras lógicas de API forem adicionadas.
 
 // Modelo de Dados do Cuidador
 class CaregiverModel {

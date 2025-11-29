@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 import 'chat_screen.dart';
 
 class ConversasScreen extends StatelessWidget {
@@ -9,7 +12,9 @@ class ConversasScreen extends StatelessWidget {
   // Função para carregar dados do cuidador
   Future<Map<String, dynamic>> _carregarCuidador() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8000/api/cuidador/perfil'));
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/perfil'),
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
@@ -22,7 +27,9 @@ class ConversasScreen extends StatelessWidget {
   // Função para carregar dados do paciente
   Future<Map<String, dynamic>> _carregarPaciente() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8000/api/paciente/cadastrocompleto'));
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/paciente/cadastrocompleto'),
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
@@ -35,7 +42,9 @@ class ConversasScreen extends StatelessWidget {
   // Função para carregar dados do familiar
   Future<Map<String, dynamic>> _carregarFamiliar() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8000/api/familiar/perfil'));
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/familiar/perfil'),
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
@@ -50,10 +59,7 @@ class ConversasScreen extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: isSelected ? const Color(0xFF6ABAD5) : Colors.grey,
-          ),
+          Icon(icon, color: isSelected ? const Color(0xFF6ABAD5) : Colors.grey),
           SizedBox(height: 4),
           Text(
             title,
@@ -67,7 +73,8 @@ class ConversasScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChatTile(BuildContext context, {
+  Widget _buildChatTile(
+    BuildContext context, {
     required String name,
     required String message,
     required String imagePath,
@@ -79,10 +86,8 @@ class ConversasScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatScreen(
-              chatName: name,
-              imagePath: imagePath,
-            ),
+            builder: (context) =>
+                ChatScreen(chatName: name, imagePath: imagePath),
           ),
         );
       },
@@ -107,19 +112,13 @@ class ConversasScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name, 
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    name,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    message, 
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
+                    message,
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ],
               ),
@@ -130,10 +129,7 @@ class ConversasScreen extends StatelessWidget {
                 if (lastMessageTime != null)
                   Text(
                     lastMessageTime,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 SizedBox(height: 4),
                 if (unreadCount > 0)
@@ -143,7 +139,7 @@ class ConversasScreen extends StatelessWidget {
                     child: Text(
                       unreadCount.toString(),
                       style: TextStyle(
-                        color: Colors.white, 
+                        color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -172,9 +168,9 @@ class ConversasScreen extends StatelessWidget {
       ),
       body: FutureBuilder(
         future: Future.wait([
-          _carregarCuidador(), 
-          _carregarPaciente(), 
-          _carregarFamiliar()
+          _carregarCuidador(),
+          _carregarPaciente(),
+          _carregarFamiliar(),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -219,7 +215,8 @@ class ConversasScreen extends StatelessWidget {
           String formatarNomePaciente(String nome) {
             if (nome == 'Paciente') return nome;
             // Verifica se já começa com Sr. ou Sra.
-            if (!nome.toLowerCase().startsWith('sr.') && !nome.toLowerCase().startsWith('sra.')) {
+            if (!nome.toLowerCase().startsWith('sr.') &&
+                !nome.toLowerCase().startsWith('sra.')) {
               // Aqui você pode adicionar lógica para determinar gênero se tiver essa informação
               return 'Sr. $nome';
             }
@@ -243,7 +240,7 @@ class ConversasScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16),
-                
+
                 // Conversa com o Familiar
                 _buildChatTile(
                   context,
@@ -253,7 +250,7 @@ class ConversasScreen extends StatelessWidget {
                   unreadCount: 4,
                   lastMessageTime: '10:30',
                 ),
-                
+
                 // Conversa com o Paciente
                 _buildChatTile(
                   context,

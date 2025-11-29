@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'home_cuidador_screen.dart';
 
 // Models
@@ -34,10 +37,12 @@ class PatientTaskSelectionScreen extends StatefulWidget {
   });
 
   @override
-  State<PatientTaskSelectionScreen> createState() => _PatientTaskSelectionScreenState();
+  State<PatientTaskSelectionScreen> createState() =>
+      _PatientTaskSelectionScreenState();
 }
 
-class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen> {
+class _PatientTaskSelectionScreenState
+    extends State<PatientTaskSelectionScreen> {
   List<Patient> _patients = [];
   bool _isLoading = true;
   String? _error;
@@ -54,7 +59,7 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
       _error = null;
     });
 
-    const apiUrl = 'http://localhost:8000/api/cuidador/SelecionarPacienteTarefa';
+    const apiUrl = '${Config.apiUrl}/api/cuidador/SelecionarPacienteTarefa';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -64,10 +69,10 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = json.decode(response.body);
-        
+
         if (responseBody['success'] == true && responseBody['data'] is List) {
           final List<dynamic> data = responseBody['data'];
-          
+
           final fetchedPatients = data.map<Patient>((item) {
             return Patient(
               id: item['id']?.toString() ?? '0',
@@ -95,7 +100,8 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
       }
     } catch (e) {
       setState(() {
-        _error = 'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
+        _error =
+            'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
         _isLoading = false;
       });
     }
@@ -158,11 +164,7 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
   Widget _buildErrorWidget() {
     return Column(
       children: [
-        const Icon(
-          Icons.error_outline,
-          color: Colors.red,
-          size: 64,
-        ),
+        const Icon(Icons.error_outline, color: Colors.red, size: 64),
         const SizedBox(height: 16),
         Text(
           _error!,
@@ -175,12 +177,15 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
           ),
-          child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Tentar Novamente',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
   }
-  
+
   Widget _buildPatientList() {
     if (_patients.isEmpty) {
       return const Center(
@@ -188,12 +193,15 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
           children: [
             Icon(Icons.people_outline, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text('Nenhum paciente encontrado.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            Text(
+              'Nenhum paciente encontrado.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ],
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -204,7 +212,7 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
       },
     );
   }
-  
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(80.0),
@@ -227,10 +235,7 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color.fromARGB(255, 106, 186, 213),
-              ],
+              colors: [Color(0xFFB3E5FC), Color.fromARGB(255, 106, 186, 213)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -262,7 +267,10 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
         decoration: InputDecoration(
           hintText: 'Buscar pacientes',
           hintStyle: TextStyle(color: Colors.grey),
-          prefixIcon: Icon(Icons.search, color: Color.fromARGB(255, 106, 186, 213)),
+          prefixIcon: Icon(
+            Icons.search,
+            color: Color.fromARGB(255, 106, 186, 213),
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
@@ -280,24 +288,45 @@ class _PatientTaskSelectionScreenState extends State<PatientTaskSelectionScreen>
         contentPadding: const EdgeInsets.all(16.0),
         leading: CircleAvatar(
           radius: 30,
-          backgroundColor: const Color.fromARGB(255, 106, 186, 213).withOpacity(0.2),
-          child: const Icon(Icons.person, color: Color.fromARGB(255, 106, 186, 213), size: 30),
+          backgroundColor: const Color.fromARGB(
+            255,
+            106,
+            186,
+            213,
+          ).withOpacity(0.2),
+          child: const Icon(
+            Icons.person,
+            color: Color.fromARGB(255, 106, 186, 213),
+            size: 30,
+          ),
         ),
         title: Text(
           patient.nome,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
-        subtitle: Text('Idade: ${patient.idade}', style: const TextStyle(color: Colors.black54)),
+        subtitle: Text(
+          'Idade: ${patient.idade}',
+          style: const TextStyle(color: Colors.black54),
+        ),
         trailing: ElevatedButton(
           onPressed: () {
             _navigateToConfirmationScreen(context, patient);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Selecionar', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Selecionar',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );
@@ -338,19 +367,34 @@ class TaskNotificationScreen extends StatelessWidget {
 
   String _formatarData(DateTime data) {
     final diasSemana = [
-      'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
-      'Quinta-feira', 'Sexta-feira', 'Sábado'
+      'Domingo',
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
     ];
-    
+
     final meses = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
-    
+
     // CORREÇÃO: data.weekday retorna 1-7 (Segunda-Domingo), precisa ajustar o índice
     final diaSemana = diasSemana[data.weekday % 7];
     final mesExtenso = meses[data.month - 1];
-    
+
     return '$diaSemana, ${data.day} de $mesExtenso de ${data.year}';
   }
 
@@ -365,10 +409,7 @@ class TaskNotificationScreen extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  corPrincipal.withOpacity(0.9),
-                  corPrincipal,
-                ],
+                colors: [corPrincipal.withOpacity(0.9), corPrincipal],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -386,7 +427,11 @@ class TaskNotificationScreen extends StatelessWidget {
                       color: Colors.white,
                     ),
                     padding: const EdgeInsets.all(24),
-                    child: Icon(Icons.check_rounded, size: 60, color: corPrincipal),
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 60,
+                      color: corPrincipal,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -444,7 +489,10 @@ class TaskNotificationScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Paciente',
-                                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                     Text(
                                       paciente,
@@ -470,7 +518,10 @@ class TaskNotificationScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Data da tarefa',
-                                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                     Text(
                                       '$dataFormatada, às $hora',
@@ -495,21 +546,30 @@ class TaskNotificationScreen extends StatelessWidget {
                       // Navegação corrigida - volta para a tela inicial
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeCuidadorScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => HomeCuidadorScreen(),
+                        ),
                         (Route<dynamic> route) => false,
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       elevation: 5,
-                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 50,
+                        vertical: 15,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
                     child: Text(
                       'Voltar a Tela Inicial',
-                      style: TextStyle(fontSize: 16, color: corPrincipal, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: corPrincipal,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],

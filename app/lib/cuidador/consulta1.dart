@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'confirmar_agendamento_medicamento_screen.dart';
 
 class Patient {
@@ -21,10 +24,12 @@ class SelecionarPacienteMedicamento extends StatefulWidget {
   const SelecionarPacienteMedicamento({super.key});
 
   @override
-  State<SelecionarPacienteMedicamento> createState() => _SelecionarPacienteMedicamentoState();
+  State<SelecionarPacienteMedicamento> createState() =>
+      _SelecionarPacienteMedicamentoState();
 }
 
-class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedicamento> {
+class _SelecionarPacienteMedicamentoState
+    extends State<SelecionarPacienteMedicamento> {
   List<Patient> _patients = [];
   bool _isLoading = true;
   String? _error;
@@ -41,8 +46,8 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
       _error = null;
     });
 
-  
-    const apiUrl = 'http://localhost:8000/api/cuidador/SelecionarPacienteMedicamento';
+    const apiUrl =
+        '${Config.apiUrl}/api/cuidador/SelecionarPacienteMedicamento';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -52,10 +57,10 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = json.decode(response.body);
-        
+
         if (responseBody['success'] == true && responseBody['data'] is List) {
           final List<dynamic> data = responseBody['data'];
-          
+
           final fetchedPatients = data.map<Patient>((item) {
             return Patient(
               id: item['id']?.toString() ?? '0',
@@ -83,7 +88,8 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
       }
     } catch (e) {
       setState(() {
-        _error = 'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
+        _error =
+            'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
         _isLoading = false;
       });
     }
@@ -115,7 +121,9 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
                 const Center(
                   child: Column(
                     children: [
-                      CircularProgressIndicator(color: Color.fromARGB(255, 106, 186, 213)),
+                      CircularProgressIndicator(
+                        color: Color.fromARGB(255, 106, 186, 213),
+                      ),
                       SizedBox(height: 16),
                       Text('Carregando pacientes...'),
                     ],
@@ -142,11 +150,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
   Widget _buildErrorWidget() {
     return Column(
       children: [
-        Icon(
-          Icons.error_outline,
-          color: Colors.red,
-          size: 64,
-        ),
+        Icon(Icons.error_outline, color: Colors.red, size: 64),
         const SizedBox(height: 16),
         Text(
           _error!,
@@ -159,12 +163,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
           ),
-          child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Tentar Novamente',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
   }
-  
+
   Widget _buildPatientList() {
     if (_patients.isEmpty) {
       return const Center(
@@ -172,12 +179,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           children: [
             Icon(Icons.people_outline, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text('Nenhum paciente encontrado.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            Text(
+              'Nenhum paciente encontrado.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ],
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -193,7 +203,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
       },
     );
   }
-  
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(80.0),
@@ -216,10 +226,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color.fromARGB(255, 106, 186, 213),
-              ],
+              colors: [Color(0xFFB3E5FC), Color.fromARGB(255, 106, 186, 213)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -251,7 +258,10 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
         decoration: InputDecoration(
           hintText: 'Buscar pacientes',
           hintStyle: TextStyle(color: Colors.grey),
-          prefixIcon: Icon(Icons.search, color: Color.fromARGB(255, 106, 186, 213)),
+          prefixIcon: Icon(
+            Icons.search,
+            color: Color.fromARGB(255, 106, 186, 213),
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
@@ -259,7 +269,12 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
     );
   }
 
-  Widget _buildPatientCard(BuildContext context, String name, String age, String imagePath) {
+  Widget _buildPatientCard(
+    BuildContext context,
+    String name,
+    String age,
+    String imagePath,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
@@ -269,14 +284,30 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
         contentPadding: const EdgeInsets.all(16.0),
         leading: CircleAvatar(
           radius: 30,
-          backgroundColor: const Color.fromARGB(255, 106, 186, 213).withOpacity(0.2),
-          child: const Icon(Icons.person, color: Color.fromARGB(255, 106, 186, 213), size: 30),
+          backgroundColor: const Color.fromARGB(
+            255,
+            106,
+            186,
+            213,
+          ).withOpacity(0.2),
+          child: const Icon(
+            Icons.person,
+            color: Color.fromARGB(255, 106, 186, 213),
+            size: 30,
+          ),
         ),
         title: Text(
           name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
-        subtitle: Text('Idade: $age', style: const TextStyle(color: Colors.black54)),
+        subtitle: Text(
+          'Idade: $age',
+          style: const TextStyle(color: Colors.black54),
+        ),
         trailing: ElevatedButton(
           onPressed: () {
             Navigator.push(
@@ -294,10 +325,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Selecionar', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Selecionar',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );

@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:convert'; // Para decodificar a resposta JSON
-import 'package:http/http.dart' as http; // Adicionar esta biblioteca no pubspec.yaml
-import 'perfil_screen.dart';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart'
+    as http; // Adicionar esta biblioteca no pubspec.yaml
+
+import '../config.dart';
 import 'configuracoes_screen.dart';
-import 'politica_privacidade_screen.dart';
 import 'historico_registros_screen.dart';
 import 'login_screen.dart';
+import 'perfil_screen.dart';
 
 // Modelo de Dados Mínimo para o Perfil
 class CuidadorPerfil {
@@ -15,7 +18,9 @@ class CuidadorPerfil {
 
   factory CuidadorPerfil.fromJson(Map<String, dynamic> json) {
     return CuidadorPerfil(
-      nome: json['nome'] ?? 'Nome Desconhecido', // Garante que o campo 'nome' seja usado
+      nome:
+          json['nome'] ??
+          'Nome Desconhecido', // Garante que o campo 'nome' seja usado
     );
   }
 }
@@ -34,7 +39,7 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
 
   // URL da API. Use o IP especial 10.0.2.2 para emuladores Android
   // ou 'localhost' se estiver testando no Chrome/Web.
-  final String apiUrl = 'http://localhost:8000/api/cuidador/perfil';
+  final String apiUrl = '${Config.apiUrl}/api/cuidador/perfil';
 
   @override
   void initState() {
@@ -53,7 +58,9 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
         return CuidadorPerfil.fromJson(data);
       } else {
         // Erro na API (400, 404, 500 etc.)
-        throw Exception('Falha ao carregar o perfil: Status ${response.statusCode}');
+        throw Exception(
+          'Falha ao carregar o perfil: Status ${response.statusCode}',
+        );
       }
     } catch (e) {
       // Erro de rede ou parse
@@ -90,16 +97,21 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          
+
           // 2. Se houver erro, mostra a mensagem de erro
           if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}', style: TextStyle(color: Colors.red)));
+            return Center(
+              child: Text(
+                'Erro: ${snapshot.error}',
+                style: TextStyle(color: Colors.red),
+              ),
+            );
           }
-          
+
           // 3. Se houver dados, exibe a tela
           if (snapshot.hasData) {
             final perfil = snapshot.data!;
-            
+
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -119,7 +131,10 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
                   ),
                   SizedBox(height: 10),
                   // AQUI está o campo que PUXA o nome do DB
-                  Text(perfil.nome, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(
+                    perfil.nome,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 30),
                   _buildProfileItem(
                     context,
@@ -139,7 +154,9 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ConfiguracoesScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => ConfiguracoesScreen(),
+                        ),
                       );
                     },
                   ),
@@ -158,7 +175,9 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => HistoricoDeRegistros()),
+                        MaterialPageRoute(
+                          builder: (context) => HistoricoDeRegistros(),
+                        ),
                       );
                     },
                   ),
@@ -166,7 +185,7 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
               ),
             );
           }
-          
+
           // Caso padrão (nunca deve acontecer se o código estiver certo)
           return Center(child: Text('Nenhum dado encontrado.'));
         },
@@ -193,7 +212,9 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
                 Navigator.of(context).pop();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginUnificadoScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => LoginUnificadoScreen(),
+                  ),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -205,18 +226,21 @@ class _MeuPerfilScreenState extends State<MeuPerfilScreen> {
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildProfileItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Row(
           children: [
-            Icon(icon, color: const Color.fromARGB(255, 106, 186, 213),),
+            Icon(icon, color: const Color.fromARGB(255, 106, 186, 213)),
             SizedBox(width: 20),
-            Expanded(
-              child: Text(label, style: TextStyle(fontSize: 16)),
-            ),
+            Expanded(child: Text(label, style: TextStyle(fontSize: 16))),
             Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),

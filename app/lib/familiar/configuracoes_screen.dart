@@ -1,10 +1,10 @@
-
-
+import 'dart:convert';
 
 import 'package:algumacoisa/cuidador/trocadesenha.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 import 'notificacoes_screen.dart';
 
 class ConfiguracoesScreen extends StatelessWidget {
@@ -16,7 +16,9 @@ class ConfiguracoesScreen extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Deletar Conta'),
-          content: const Text('Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.'),
+          content: const Text(
+            'Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -29,10 +31,7 @@ class ConfiguracoesScreen extends StatelessWidget {
                 Navigator.of(context).pop();
                 await _confirmarDelecao(context);
               },
-              child: const Text(
-                'Deletar',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Deletar', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -99,10 +98,9 @@ class ConfiguracoesScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/login', 
-                  (route) => false,
-                );
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
               },
               child: const Text('OK'),
             ),
@@ -136,25 +134,21 @@ class ConfiguracoesScreen extends StatelessWidget {
   Future<Map<String, dynamic>> deletarContaAPI() async {
     try {
       // **IMPORTANTE: Use o IP da sua máquina, não localhost**
-      const String baseUrl = 'http://localhost:8000'; // Substitua pelo IP do seu servidor
-      
+      const String baseUrl =
+          Config.apiUrl; // Substitua pelo IP do seu servidor
+
       final userId = await _obterUserId();
-      
+
       if (userId.isEmpty) {
-        return {
-          'success': false,
-          'message': 'Usuário não encontrado'
-        };
+        return {'success': false, 'message': 'Usuário não encontrado'};
       }
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/familiar/delete-account'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'userId': userId,
-          'confirmacao': 'CONFIRMAR_DELECAO'
+          'confirmacao': 'CONFIRMAR_DELECAO',
         }),
       );
 
@@ -169,21 +163,18 @@ class ConfiguracoesScreen extends StatelessWidget {
           final errorData = json.decode(response.body);
           return {
             'success': false,
-            'message': errorData['message'] ?? 'Erro ao deletar conta'
+            'message': errorData['message'] ?? 'Erro ao deletar conta',
           };
         } catch (e) {
           return {
             'success': false,
-            'message': 'Erro HTTP ${response.statusCode}'
+            'message': 'Erro HTTP ${response.statusCode}',
           };
         }
       }
     } catch (e) {
       print('Erro na API: $e');
-      return {
-        'success': false,
-        'message': 'Erro de conexão: $e'
-      };
+      return {'success': false, 'message': 'Erro de conexão: $e'};
     }
   }
 
@@ -224,7 +215,9 @@ class ConfiguracoesScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => NotificacoesFamiliar()),
+                  MaterialPageRoute(
+                    builder: (context) => NotificacoesFamiliar(),
+                  ),
                 );
               },
             ),
@@ -235,9 +228,7 @@ class ConfiguracoesScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const Trocadesenha(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Trocadesenha()),
                 );
               },
             ),
@@ -255,7 +246,12 @@ class ConfiguracoesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsItem(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildSettingsItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -264,9 +260,7 @@ class ConfiguracoesScreen extends StatelessWidget {
           children: [
             Icon(icon, color: const Color.fromARGB(255, 25, 182, 210)),
             const SizedBox(width: 20),
-            Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 16)),
-            ),
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
             const Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),

@@ -5,7 +5,8 @@ class AgendarMedicamentoScreen extends StatefulWidget {
   const AgendarMedicamentoScreen({super.key});
 
   @override
-  _AgendarMedicamentoScreenState createState() => _AgendarMedicamentoScreenState();
+  State<AgendarMedicamentoScreen> createState() =>
+      _AgendarMedicamentoScreenState();
 }
 
 class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
@@ -16,9 +17,9 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
 
   Future<void> _scheduleMedicine() async {
     if (_selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um horário')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um horário')));
       return;
     }
 
@@ -38,14 +39,13 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
     try {
       // Navega para a tela de seleção de paciente
       _navigateToNextScreen(selectedDateTime);
-      
     } catch (e) {
       print('Erro: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro ao agendar. Tente novamente.')),
       );
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -98,11 +98,11 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
             children: <Widget>[
               _buildCalendar(month, year),
               SizedBox(height: 24),
-              
+
               // Botão "Para todos os dias"
               _buildRecurringButton(),
               SizedBox(height: 16),
-              
+
               Text(
                 'Adicione o Horário:',
                 style: TextStyle(
@@ -114,14 +114,16 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
               ),
               SizedBox(height: 16),
               _buildTimeGrid(),
-              SizedBox(height: 80), 
+              SizedBox(height: 80),
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: ElevatedButton(
-                  onPressed: (_selectedTime != null && !_isLoading) ? _scheduleMedicine : null,
+                  onPressed: (_selectedTime != null && !_isLoading)
+                      ? _scheduleMedicine
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: (_selectedTime != null && !_isLoading) 
-                        ? corPrincipal 
+                    backgroundColor: (_selectedTime != null && !_isLoading)
+                        ? corPrincipal
                         : Colors.grey[200],
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -133,14 +135,18 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                             strokeWidth: 3,
                           ),
                         )
                       : Text(
                           'Próximo',
                           style: TextStyle(
-                            color: _selectedTime != null ? Colors.white : Colors.grey[600],
+                            color: _selectedTime != null
+                                ? Colors.white
+                                : Colors.grey[600],
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -157,7 +163,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
   // Widget para o botão "Para todos os dias"
   Widget _buildRecurringButton() {
     const Color corPrincipal = Color(0xFF6ABAD5);
-    
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -179,7 +185,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        subtitle: _isRecurring 
+        subtitle: _isRecurring
             ? Text(
                 'Este medicamento será repetido diariamente',
                 style: TextStyle(
@@ -188,9 +194,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
                 ),
               )
             : null,
-        trailing: _isRecurring 
-            ? Icon(Icons.repeat, color: corPrincipal)
-            : null,
+        trailing: _isRecurring ? Icon(Icons.repeat, color: corPrincipal) : null,
         onTap: () {
           setState(() {
             _isRecurring = !_isRecurring;
@@ -199,7 +203,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
       ),
     );
   }
-  
+
   Widget _buildCalendar(int month, int year) {
     const Color corPrincipal = Color(0xFF6ABAD5);
     final daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -279,7 +283,8 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
             final isCurrentMonthDay = day.isNotEmpty;
             final dayInt = isCurrentMonthDay ? int.parse(day) : -1;
 
-            final isSelected = isCurrentMonthDay &&
+            final isSelected =
+                isCurrentMonthDay &&
                 dayInt == _selectedDate.day &&
                 month == _selectedDate.month &&
                 year == _selectedDate.year;
@@ -287,7 +292,9 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
             final DateTime currentDayDate = isCurrentMonthDay
                 ? DateTime(year, month, dayInt)
                 : DateTime.now().add(Duration(days: 9999));
-            final bool isPastDate = currentDayDate.isBefore(DateTime.now().subtract(Duration(days: 1)));
+            final bool isPastDate = currentDayDate.isBefore(
+              DateTime.now().subtract(Duration(days: 1)),
+            );
 
             return GestureDetector(
               onTap: isCurrentMonthDay && !isPastDate
@@ -301,7 +308,9 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? corPrincipal.withOpacity(0.1) : Colors.transparent,
+                    color: isSelected
+                        ? corPrincipal.withOpacity(0.1)
+                        : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   padding: EdgeInsets.all(8),
@@ -311,9 +320,13 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
                       color: isSelected
                           ? corPrincipal
                           : (isPastDate
-                              ? Colors.grey.shade400
-                              : (isCurrentMonthDay ? Colors.black : Colors.transparent)),
-                      fontWeight: isSelected || isCurrentMonthDay ? FontWeight.bold : FontWeight.normal,
+                                ? Colors.grey.shade400
+                                : (isCurrentMonthDay
+                                      ? Colors.black
+                                      : Colors.transparent)),
+                      fontWeight: isSelected || isCurrentMonthDay
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -336,7 +349,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
       '15:00',
       '17:00',
       '18:00',
-      '19:00'
+      '19:00',
     ];
 
     return GridView.builder(
@@ -360,9 +373,13 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
             });
           },
           style: OutlinedButton.styleFrom(
-            backgroundColor: isSelected ? corPrincipal.withOpacity(0.1) : Colors.white,
+            backgroundColor: isSelected
+                ? corPrincipal.withOpacity(0.1)
+                : Colors.white,
             side: BorderSide(
-              color: isSelected ? Colors.transparent : corPrincipal.withOpacity(0.4),
+              color: isSelected
+                  ? Colors.transparent
+                  : corPrincipal.withOpacity(0.4),
               width: 1.5,
             ),
             shape: RoundedRectangleBorder(
@@ -393,7 +410,7 @@ class _AgendarMedicamentoScreenState extends State<AgendarMedicamentoScreen> {
       "Setembro",
       "Outubro",
       "Novembro",
-      "Dezembro"
+      "Dezembro",
     ];
     return months[month - 1];
   }

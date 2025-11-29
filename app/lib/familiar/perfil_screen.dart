@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'caregiver_model.dart';
 import 'editar_perfil_familiar_screen.dart'; // Tela de edição específica para familiar
 
@@ -32,8 +35,9 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
     });
 
     try {
-      const String urlApi = 'http://localhost:8000/api/familiar/perfil'; // ✅ Endpoint correto
-      
+      const String urlApi =
+          '${Config.apiUrl}/api/familiar/perfil'; // ✅ Endpoint correto
+
       final response = await http.get(Uri.parse(urlApi));
 
       if (response.statusCode == 200) {
@@ -44,13 +48,13 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
           _familiarData = realData;
           _isLoading = false;
         });
-
       } else if (response.statusCode == 404) {
         throw Exception('Perfil do familiar não encontrado (código 404).');
       } else {
-        throw Exception('Falha ao carregar dados. Status: ${response.statusCode}');
+        throw Exception(
+          'Falha ao carregar dados. Status: ${response.statusCode}',
+        );
       }
-      
     } catch (e) {
       setState(() {
         _errorMessage = 'Erro de conexão/servidor: $e';
@@ -131,11 +135,11 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
           const SizedBox(height: 10),
           // Nome do familiar
           Text(
-            familiar.nome, 
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+            familiar.nome,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 30),
-          
+
           // Itens do perfil
           _buildProfileItem(
             icon: Icons.person_outline,
@@ -162,16 +166,17 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
             label: 'Email',
             value: familiar.infoFisicas, // Reutilizando este campo para email
           ),
-          
+
           const SizedBox(height: 30),
-          
+
           // Botão de editar
           ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditPerfilFamiliarScreen(familiarData: _familiarData!),
+                  builder: (context) =>
+                      EditPerfilFamiliarScreen(familiarData: _familiarData!),
                 ),
               ).then((value) {
                 // Recarregar dados se o perfil foi atualizado
@@ -199,9 +204,9 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
 
   // Widget para construir os itens do perfil
   Widget _buildProfileItem({
-    required IconData icon, 
-    required String label, 
-    required String value
+    required IconData icon,
+    required String label,
+    required String value,
   }) {
     return InkWell(
       onTap: () {
@@ -219,20 +224,17 @@ class _PerfilFamiliarState extends State<PerfilFamiliar> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    label, 
+                    label,
                     style: const TextStyle(
-                      fontSize: 16, 
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
-                    )
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                 ],
               ),

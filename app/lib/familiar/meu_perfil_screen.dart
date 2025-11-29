@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'perfil_screen.dart';
-import 'package:algumacoisa/cuidador/login_screen.dart';
-import 'configuracoes_screen.dart';
-import 'politica_privacidade_screen.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:algumacoisa/cuidador/login_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../config.dart';
+import 'configuracoes_screen.dart';
+import 'perfil_screen.dart';
 
 class MeuPerfilfamiliar extends StatefulWidget {
   const MeuPerfilfamiliar({super.key});
@@ -27,7 +29,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
   Future<void> _carregarPerfil() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/familiar/perfil'),
+        Uri.parse('${Config.apiUrl}/api/familiar/perfil'),
       );
 
       if (response.statusCode == 200) {
@@ -51,7 +53,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
 
   // Função para obter a letra inicial do nome
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -67,9 +69,9 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -79,7 +81,10 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
     final nomeCompleto = _perfilData['nome'] ?? '';
     final inicial = _getInicial(nomeCompleto);
     final avatarColor = _getAvatarColor(inicial);
-    final nomeExibicao = nomeCompleto.isNotEmpty ? nomeCompleto.split(' ').first : 'Usuário';
+    // ignore: unused_local_variable
+    final nomeExibicao = nomeCompleto.isNotEmpty
+        ? nomeCompleto.split(' ').first
+        : 'Usuário';
 
     return Scaffold(
       appBar: AppBar(
@@ -97,7 +102,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
+
             // Avatar com loading
             if (_isLoading)
               const CircleAvatar(
@@ -124,9 +129,9 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
                   ),
                 ),
               ),
-            
+
             const SizedBox(height: 10),
-            
+
             // Nome com loading
             if (_isLoading)
               const Text(
@@ -137,17 +142,22 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
               Text(
                 'Erro ao carregar',
                 style: TextStyle(
-                  fontSize: 24, 
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red
+                  color: Colors.red,
                 ),
               )
             else
               Column(
                 children: [
                   Text(
-                    nomeCompleto.isNotEmpty ? nomeCompleto : 'Nome não informado',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    nomeCompleto.isNotEmpty
+                        ? nomeCompleto
+                        : 'Nome não informado',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   // Email (se disponível)
@@ -161,9 +171,9 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
                     ),
                 ],
               ),
-            
+
             const SizedBox(height: 30),
-            
+
             _buildProfileItem(
               context,
               icon: Icons.person_outline,
@@ -175,7 +185,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
                 );
               },
             ),
-     
+
             _buildProfileItem(
               context,
               icon: Icons.settings_outlined,
@@ -183,7 +193,9 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ConfiguracoesScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => ConfiguracoesScreen(),
+                  ),
                 );
               },
             ),
@@ -195,7 +207,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
                 _showLogoutDialog(context);
               },
             ),
-            
+
             // Botão para recarregar em caso de erro
             if (_errorMessage.isNotEmpty)
               Padding(
@@ -234,7 +246,9 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
                 Navigator.of(context).pop();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginUnificadoScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => LoginUnificadoScreen(),
+                  ),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -246,7 +260,12 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildProfileItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -255,9 +274,7 @@ class _MeuPerfilfamiliarState extends State<MeuPerfilfamiliar> {
           children: [
             Icon(icon, color: const Color.fromARGB(255, 106, 186, 213)),
             const SizedBox(width: 20),
-            Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 16)),
-            ),
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
             const Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),

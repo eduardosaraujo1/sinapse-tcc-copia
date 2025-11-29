@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class TarefasScreen extends StatefulWidget {
   const TarefasScreen({super.key});
@@ -23,8 +26,10 @@ class _TarefasScreenState extends State<TarefasScreen> {
 
   Future<void> _carregarTarefas() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComTarefas'));
-      
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComTarefas'),
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -48,11 +53,11 @@ class _TarefasScreenState extends State<TarefasScreen> {
   Future<void> _atualizarStatusTarefa(String id, String status) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/api/tarefa/$id/status'),
+        Uri.parse('${Config.apiUrl}/api/tarefa/$id/status'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'status': status}),
       );
-      
+
       if (response.statusCode == 200) {
         _carregarTarefas(); // Recarrega os dados
         _mostrarSucessoSnackbar('Status atualizado com sucesso!');
@@ -74,10 +79,12 @@ class _TarefasScreenState extends State<TarefasScreen> {
           final nome = paciente['nome'].toString().toLowerCase();
           final tarefas = paciente['tarefas'] ?? [];
           final hasTarefaComTexto = tarefas.any((tarefa) {
-            final motivacao = tarefa['motivacao']?.toString().toLowerCase() ?? '';
-            final descricao = tarefa['descricao']?.toString().toLowerCase() ?? '';
-            return motivacao.contains(query.toLowerCase()) || 
-                   descricao.contains(query.toLowerCase());
+            final motivacao =
+                tarefa['motivacao']?.toString().toLowerCase() ?? '';
+            final descricao =
+                tarefa['descricao']?.toString().toLowerCase() ?? '';
+            return motivacao.contains(query.toLowerCase()) ||
+                descricao.contains(query.toLowerCase());
           });
           return nome.contains(query.toLowerCase()) || hasTarefaComTexto;
         }).toList();
@@ -87,19 +94,13 @@ class _TarefasScreenState extends State<TarefasScreen> {
 
   void _mostrarErroSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
   void _mostrarSucessoSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.green),
     );
   }
 
@@ -158,7 +159,7 @@ class _TarefasScreenState extends State<TarefasScreen> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
@@ -222,10 +223,7 @@ class _TarefasScreenState extends State<TarefasScreen> {
         title: Text('Tarefas'),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _carregarTarefas,
-          ),
+          IconButton(icon: Icon(Icons.refresh), onPressed: _carregarTarefas),
         ],
       ),
       body: Padding(
@@ -247,11 +245,7 @@ class _TarefasScreenState extends State<TarefasScreen> {
             ),
             SizedBox(height: 16),
             if (isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              )
+              Expanded(child: Center(child: CircularProgressIndicator()))
             else if (pacientesFiltrados.isEmpty && searchQuery.isNotEmpty)
               Expanded(
                 child: Center(
@@ -292,9 +286,9 @@ class _TarefasScreenState extends State<TarefasScreen> {
                   child: ListView(
                     children: pacientesFiltrados.map<Widget>((paciente) {
                       final tarefas = paciente['tarefas'] ?? [];
-                      
+
                       if (tarefas.isEmpty) return SizedBox.shrink();
-                      
+
                       final inicial = _getInicial(paciente['nome'] ?? '');
                       final avatarColor = _getAvatarColor(inicial);
 
@@ -323,10 +317,12 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                   SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          paciente['nome'] ?? 'Nome não informado',
+                                          paciente['nome'] ??
+                                              'Nome não informado',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
@@ -335,16 +331,24 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                         if (paciente['idade'] != null)
                                           Text(
                                             '${paciente['idade']} anos',
-                                            style: TextStyle(color: Colors.grey),
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                            ),
                                           ),
                                         if (paciente['comorbidade'] != null)
                                           Text(
                                             paciente['comorbidade'] ?? '',
-                                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         Text(
                                           '${tarefas.length} tarefa${tarefas.length > 1 ? 's' : ''}',
-                                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -357,16 +361,22 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                 return Card(
                                   margin: EdgeInsets.only(bottom: 8),
                                   elevation: 1,
-                                  color: _getStatusColor(status).withOpacity(0.05),
+                                  color: _getStatusColor(
+                                    status,
+                                  ).withOpacity(0.05),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.task, color: _getStatusColor(status)),
+                                        Icon(
+                                          Icons.task,
+                                          color: _getStatusColor(status),
+                                        ),
                                         SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               if (tarefa['motivacao'] != null)
                                                 Text(
@@ -380,17 +390,26 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                               if (tarefa['descricao'] != null)
                                                 Text(
                                                   tarefa['descricao'],
-                                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                                  style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 12,
+                                                  ),
                                                 ),
                                               if (tarefa['data_tarefa'] != null)
                                                 SizedBox(height: 4),
                                               if (tarefa['data_tarefa'] != null)
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                                                    Icon(
+                                                      Icons.calendar_today,
+                                                      size: 14,
+                                                      color: Colors.grey,
+                                                    ),
                                                     SizedBox(width: 4),
                                                     Text(
-                                                      _formatarData(tarefa['data_tarefa']),
+                                                      _formatarData(
+                                                        tarefa['data_tarefa'],
+                                                      ),
                                                       style: TextStyle(
                                                         fontSize: 11,
                                                         color: Colors.grey,
@@ -404,16 +423,28 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                         Column(
                                           children: [
                                             Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
                                               decoration: BoxDecoration(
-                                                color: _getStatusColor(status).withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(color: _getStatusColor(status)),
+                                                color: _getStatusColor(
+                                                  status,
+                                                ).withOpacity(0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: _getStatusColor(
+                                                    status,
+                                                  ),
+                                                ),
                                               ),
                                               child: Text(
                                                 _formatarStatus(status),
                                                 style: TextStyle(
-                                                  color: _getStatusColor(status),
+                                                  color: _getStatusColor(
+                                                    status,
+                                                  ),
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -422,7 +453,10 @@ class _TarefasScreenState extends State<TarefasScreen> {
                                             SizedBox(height: 4),
                                             IconButton(
                                               icon: Icon(Icons.edit, size: 16),
-                                              onPressed: () => _mostrarDialogoStatusTarefa(tarefa),
+                                              onPressed: () =>
+                                                  _mostrarDialogoStatusTarefa(
+                                                    tarefa,
+                                                  ),
                                               tooltip: 'Alterar status',
                                               padding: EdgeInsets.zero,
                                               constraints: BoxConstraints(),

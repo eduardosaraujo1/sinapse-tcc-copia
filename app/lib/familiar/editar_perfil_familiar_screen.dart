@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'caregiver_model.dart';
 
 class EditPerfilFamiliarScreen extends StatefulWidget {
@@ -9,7 +12,8 @@ class EditPerfilFamiliarScreen extends StatefulWidget {
   const EditPerfilFamiliarScreen({super.key, required this.familiarData});
 
   @override
-  State<EditPerfilFamiliarScreen> createState() => _EditPerfilFamiliarScreenState();
+  State<EditPerfilFamiliarScreen> createState() =>
+      _EditPerfilFamiliarScreenState();
 }
 
 class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
@@ -28,69 +32,74 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
     super.initState();
     // Inicializar controllers com dados atuais
     _nomeController = TextEditingController(text: widget.familiarData.nome);
-    _telefoneController = TextEditingController(text: widget.familiarData.numero);
-    _dataNascimentoController = TextEditingController(text: widget.familiarData.dataNascimento);
-    _enderecoController = TextEditingController(text: widget.familiarData.endereco);
-    _emailController = TextEditingController(text: widget.familiarData.infoFisicas);
-  }
-
- Future<void> _salvarPerfil() async {
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    const String urlApi = 'http://localhost:8000/api/familiar/atualizar-perfil'; // ✅ Endpoint correto
-    
-    final response = await http.put(
-      Uri.parse(urlApi),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'nome': _nomeController.text,
-        'telefone': _telefoneController.text,
-        'data_nascimento': _dataNascimentoController.text,
-        'endereco': _enderecoController.text,
-        'email': _emailController.text,
-      }),
+    _telefoneController = TextEditingController(
+      text: widget.familiarData.numero,
     );
+    _dataNascimentoController = TextEditingController(
+      text: widget.familiarData.dataNascimento,
+    );
+    _enderecoController = TextEditingController(
+      text: widget.familiarData.endereco,
+    );
+    _emailController = TextEditingController(
+      text: widget.familiarData.infoFisicas,
+    );
+  }
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      
-      if (data['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil do familiar atualizado com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, true);
+  Future<void> _salvarPerfil() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      const String urlApi =
+          '${Config.apiUrl}/api/familiar/atualizar-perfil'; // ✅ Endpoint correto
+
+      final response = await http.put(
+        Uri.parse(urlApi),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'nome': _nomeController.text,
+          'telefone': _telefoneController.text,
+          'data_nascimento': _dataNascimentoController.text,
+          'endereco': _enderecoController.text,
+          'email': _emailController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Perfil do familiar atualizado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        } else {
+          throw Exception(data['message'] ?? 'Erro ao atualizar perfil');
+        }
       } else {
-        throw Exception(data['message'] ?? 'Erro ao atualizar perfil');
+        throw Exception('Falha ao atualizar. Status: ${response.statusCode}');
       }
-    } else {
-      throw Exception('Falha ao atualizar. Status: ${response.statusCode}');
-    }
-    
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Erro: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
-}
 
   Future<void> _selecionarData() async {
     final DateTime? picked = await showDatePicker(
@@ -99,11 +108,11 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    
+
     if (picked != null) {
       setState(() {
         _dataNascimentoController.text =
-          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       });
     }
   }
@@ -147,7 +156,7 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      
+
                       // Avatar circular com letra inicial
                       CircleAvatar(
                         radius: 50,
@@ -161,9 +170,9 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 30),
-                      
+
                       // Campo Nome Completo
                       _buildEditableField(
                         icon: Icons.person_outline,
@@ -176,7 +185,7 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           return null;
                         },
                       ),
-                      
+
                       // Campo Telefone
                       _buildEditableField(
                         icon: Icons.phone_outlined,
@@ -190,7 +199,7 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           return null;
                         },
                       ),
-                      
+
                       // Campo Data de Nascimento
                       _buildEditableField(
                         icon: Icons.cake_outlined,
@@ -205,7 +214,7 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           return null;
                         },
                       ),
-                      
+
                       // Campo Endereço
                       _buildEditableField(
                         icon: Icons.location_on_outlined,
@@ -219,7 +228,7 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           return null;
                         },
                       ),
-                      
+
                       // Campo Email
                       _buildEditableField(
                         icon: Icons.email_outlined,
@@ -236,9 +245,9 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                           return null;
                         },
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Botão Salvar
                       SizedBox(
                         width: double.infinity,
@@ -270,9 +279,9 @@ class _EditPerfilFamiliarScreenState extends State<EditPerfilFamiliarScreen> {
                                 ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 10),
-                      
+
                       // Botão Cancelar
                       TextButton(
                         onPressed: _isLoading

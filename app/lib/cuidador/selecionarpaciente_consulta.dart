@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/confirmar_agendamento_screen.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 
 class Patient {
   final String id;
@@ -32,10 +35,12 @@ class SelecionarPacienteConsulta extends StatefulWidget {
   });
 
   @override
-  State<SelecionarPacienteConsulta> createState() => _SelecionarPacienteConsultaState();
+  State<SelecionarPacienteConsulta> createState() =>
+      _SelecionarPacienteConsultaState();
 }
 
-class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta> {
+class _SelecionarPacienteConsultaState
+    extends State<SelecionarPacienteConsulta> {
   List<Patient> _patients = [];
   bool _isLoading = true;
   String? _error;
@@ -53,23 +58,22 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
     });
 
     // CORREÇÃO: Use uma URL válida para seu ambiente
-    const apiUrl = 'http://localhost:8000/api/cuidador/SelecionarPacienteConsulta';
+    const apiUrl = '${Config.apiUrl}/api/cuidador/SelecionarPacienteConsulta';
 
     try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(Uri.parse(apiUrl), headers: {'Content-Type': 'application/json'})
+          .timeout(const Duration(seconds: 10));
 
       print('Status Code: ${response.statusCode}');
       print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = json.decode(response.body);
-        
+
         if (responseBody['success'] == true && responseBody['data'] is List) {
           final List<dynamic> data = responseBody['data'];
-          
+
           final fetchedPatients = data.map<Patient>((item) {
             return Patient(
               id: item['id']?.toString() ?? '0',
@@ -97,7 +101,8 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
       }
     } catch (e) {
       setState(() {
-        _error = 'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
+        _error =
+            'Erro de conexão: $e\n\nVerifique:\n1. Servidor está rodando\n2. URL correta\n3. CORS habilitado';
         _isLoading = false;
       });
     }
@@ -148,7 +153,9 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
                 const Center(
                   child: Column(
                     children: [
-                      CircularProgressIndicator(color: Color.fromARGB(255, 106, 186, 213)),
+                      CircularProgressIndicator(
+                        color: Color.fromARGB(255, 106, 186, 213),
+                      ),
                       SizedBox(height: 16),
                       Text('Carregando pacientes...'),
                     ],
@@ -175,11 +182,7 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
   Widget _buildErrorWidget() {
     return Column(
       children: [
-        const Icon(
-          Icons.error_outline,
-          color: Colors.red,
-          size: 64,
-        ),
+        const Icon(Icons.error_outline, color: Colors.red, size: 64),
         const SizedBox(height: 16),
         Text(
           _error!,
@@ -192,12 +195,15 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
           ),
-          child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Tentar Novamente',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
   }
-  
+
   Widget _buildPatientList() {
     if (_patients.isEmpty) {
       return const Center(
@@ -205,12 +211,15 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
           children: [
             Icon(Icons.people_outline, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text('Nenhum paciente encontrado.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            Text(
+              'Nenhum paciente encontrado.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ],
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -221,7 +230,7 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
       },
     );
   }
-  
+
   // CORREÇÃO: Método simplificado para construir o card
   Widget _buildPatientCard(Patient patient) {
     return Card(
@@ -233,22 +242,45 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
         contentPadding: const EdgeInsets.all(16.0),
         leading: CircleAvatar(
           radius: 30,
-          backgroundColor: const Color.fromARGB(255, 106, 186, 213).withOpacity(0.2),
-          child: const Icon(Icons.person, color: Color.fromARGB(255, 106, 186, 213), size: 30),
+          backgroundColor: const Color.fromARGB(
+            255,
+            106,
+            186,
+            213,
+          ).withOpacity(0.2),
+          child: const Icon(
+            Icons.person,
+            color: Color.fromARGB(255, 106, 186, 213),
+            size: 30,
+          ),
         ),
         title: Text(
           patient.nome,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
-        subtitle: Text('Idade: ${patient.idade}', style: const TextStyle(color: Colors.black54)),
+        subtitle: Text(
+          'Idade: ${patient.idade}',
+          style: const TextStyle(color: Colors.black54),
+        ),
         trailing: ElevatedButton(
-          onPressed: () => _navigateToConfirmation(patient), // CORREÇÃO: Usando método separado
+          onPressed: () => _navigateToConfirmation(
+            patient,
+          ), // CORREÇÃO: Usando método separado
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 106, 186, 213),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Selecionar', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Selecionar',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );
@@ -276,10 +308,7 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color.fromARGB(255, 106, 186, 213),
-              ],
+              colors: [Color(0xFFB3E5FC), Color.fromARGB(255, 106, 186, 213)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -311,7 +340,10 @@ class _SelecionarPacienteConsultaState extends State<SelecionarPacienteConsulta>
         decoration: InputDecoration(
           hintText: 'Buscar pacientes',
           hintStyle: TextStyle(color: Colors.grey),
-          prefixIcon: Icon(Icons.search, color: Color.fromARGB(255, 106, 186, 213)),
+          prefixIcon: Icon(
+            Icons.search,
+            color: Color.fromARGB(255, 106, 186, 213),
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),

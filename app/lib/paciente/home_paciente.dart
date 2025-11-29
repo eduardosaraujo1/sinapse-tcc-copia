@@ -5,9 +5,10 @@ import 'package:algumacoisa/paciente/emergencia_paciente.dart';
 import 'package:algumacoisa/paciente/mensagems_paciente.dart';
 import 'package:algumacoisa/paciente/perfil_paciente.dart';
 import 'package:algumacoisa/paciente/sentimentos_paciente.dart';
-import 'package:algumacoisa/paciente/sintomas_paciente.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../config.dart';
 
 class HomePaciente extends StatefulWidget {
   const HomePaciente({super.key});
@@ -83,30 +84,30 @@ class _HomePacienteState extends State<HomePaciente> {
   Future<void> _marcarComoFeito(String tipo, String id) async {
     try {
       String endpoint = '';
-      
+
       switch (tipo) {
         case 'consulta':
-          endpoint = 'http://localhost:8000/api/consulta/$id/status';
+          endpoint = '${Config.apiUrl}/api/consulta/$id/status';
           break;
         case 'medicamento':
-          endpoint = 'http://localhost:8000/api/medicamento/$id/status';
+          endpoint = '${Config.apiUrl}/api/medicamento/$id/status';
           break;
         case 'tarefa':
-          endpoint = 'http://localhost:8000/api/tarefa/$id/status';
+          endpoint = '${Config.apiUrl}/api/tarefa/$id/status';
           break;
       }
-      
+
       final response = await http.put(
         Uri.parse(endpoint),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'status': 'feita'}),
       );
-      
+
       if (response.statusCode == 200) {
         print('✅ $tipo marcado como feito');
         // Recarregar os dados
         _carregarAtribuicoes();
-        
+
         // Mostrar snackbar de confirmação
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -131,15 +132,17 @@ class _HomePacienteState extends State<HomePaciente> {
   Future<void> _carregarDadosPaciente() async {
     try {
       print('🔍 Iniciando requisição para a API...');
-      final response = await http.get(Uri.parse('http://localhost:8000/api/paciente/perfil'));
-      
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/paciente/perfil'),
+      );
+
       print('📊 Status Code: ${response.statusCode}');
       print('📦 Response Body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('✅ Dados recebidos da API: $data');
-        
+
         setState(() {
           _pacienteData = data;
         });
@@ -156,9 +159,11 @@ class _HomePacienteState extends State<HomePaciente> {
   Future<void> _carregarAtribuicoes() async {
     try {
       print('📋 Carregando atribuições do paciente...');
-      
+
       // Carregar consultas
-      final consultasResponse = await http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComConsulta'));
+      final consultasResponse = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComConsulta'),
+      );
       if (consultasResponse.statusCode == 200) {
         final consultasData = json.decode(consultasResponse.body);
         setState(() {
@@ -168,7 +173,9 @@ class _HomePacienteState extends State<HomePaciente> {
       }
 
       // Carregar medicamentos
-      final medicamentosResponse = await http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComMedicamentos'));
+      final medicamentosResponse = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComMedicamentos'),
+      );
       if (medicamentosResponse.statusCode == 200) {
         final medicamentosData = json.decode(medicamentosResponse.body);
         setState(() {
@@ -178,7 +185,9 @@ class _HomePacienteState extends State<HomePaciente> {
       }
 
       // Carregar tarefas
-      final tarefasResponse = await http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComTarefas'));
+      final tarefasResponse = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComTarefas'),
+      );
       if (tarefasResponse.statusCode == 200) {
         final tarefasData = json.decode(tarefasResponse.body);
         setState(() {
@@ -190,7 +199,6 @@ class _HomePacienteState extends State<HomePaciente> {
       setState(() {
         _isLoading = false;
       });
-
     } catch (error) {
       print('💥 Erro ao carregar atribuições: $error');
       setState(() {
@@ -202,16 +210,13 @@ class _HomePacienteState extends State<HomePaciente> {
   void _usarDadosPadrao() {
     print('🔄 Usando dados padrão...');
     setState(() {
-      _pacienteData = {
-        'nome': 'Paulo',
-        'foto_url': 'assets/Paulosikera.jpg'
-      };
+      _pacienteData = {'nome': 'Paulo', 'foto_url': 'assets/Paulosikera.jpg'};
     });
   }
 
   // Função para obter a letra inicial do nome
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -227,9 +232,9 @@ class _HomePacienteState extends State<HomePaciente> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -247,13 +252,15 @@ class _HomePacienteState extends State<HomePaciente> {
   // Função para obter consultas de hoje
   List<dynamic> _getConsultasDeHoje() {
     final hoje = DateTime.now();
-    return _consultas.expand((paciente) => paciente['consultas'] ?? []).where((consulta) {
+    return _consultas.expand((paciente) => paciente['consultas'] ?? []).where((
+      consulta,
+    ) {
       if (consulta['hora_consulta'] == null) return false;
       try {
         final dataConsulta = DateTime.parse(consulta['hora_consulta']);
         return dataConsulta.year == hoje.year &&
-               dataConsulta.month == hoje.month &&
-               dataConsulta.day == hoje.day;
+            dataConsulta.month == hoje.month &&
+            dataConsulta.day == hoje.day;
       } catch (e) {
         return false;
       }
@@ -263,29 +270,34 @@ class _HomePacienteState extends State<HomePaciente> {
   // Função para obter medicamentos de hoje
   List<dynamic> _getMedicamentosDeHoje() {
     final hoje = DateTime.now();
-    return _medicamentos.expand((paciente) => paciente['medicamentos'] ?? []).where((medicamento) {
-      if (medicamento['data_hora'] == null) return false;
-      try {
-        final dataMedicamento = DateTime.parse(medicamento['data_hora']);
-        return dataMedicamento.year == hoje.year &&
-               dataMedicamento.month == hoje.month &&
-               dataMedicamento.day == hoje.day;
-      } catch (e) {
-        return false;
-      }
-    }).toList();
+    return _medicamentos
+        .expand((paciente) => paciente['medicamentos'] ?? [])
+        .where((medicamento) {
+          if (medicamento['data_hora'] == null) return false;
+          try {
+            final dataMedicamento = DateTime.parse(medicamento['data_hora']);
+            return dataMedicamento.year == hoje.year &&
+                dataMedicamento.month == hoje.month &&
+                dataMedicamento.day == hoje.day;
+          } catch (e) {
+            return false;
+          }
+        })
+        .toList();
   }
 
   // Função para obter tarefas de hoje
   List<dynamic> _getTarefasDeHoje() {
     final hoje = DateTime.now();
-    return _tarefas.expand((paciente) => paciente['tarefas'] ?? []).where((tarefa) {
+    return _tarefas.expand((paciente) => paciente['tarefas'] ?? []).where((
+      tarefa,
+    ) {
       if (tarefa['data_tarefa'] == null) return false;
       try {
         final dataTarefa = DateTime.parse(tarefa['data_tarefa']);
         return dataTarefa.year == hoje.year &&
-               dataTarefa.month == hoje.month &&
-               dataTarefa.day == hoje.day;
+            dataTarefa.month == hoje.month &&
+            dataTarefa.day == hoje.day;
       } catch (e) {
         return false;
       }
@@ -299,13 +311,22 @@ class _HomePacienteState extends State<HomePaciente> {
 
     switch (index) {
       case 0:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const AgendaPaciente()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AgendaPaciente()),
+        );
         break;
       case 1:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MensagemsPaciente()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MensagemsPaciente()),
+        );
         break;
       case 3:
-        Navigator.push(context, MaterialPageRoute(builder: (context) => SentimentosPaciente()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SentimentosPaciente()),
+        );
         break;
     }
   }
@@ -324,10 +345,7 @@ class _HomePacienteState extends State<HomePaciente> {
               const Text(
                 'Tem certeza de que deseja enviar um alerta de emergência?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -336,7 +354,9 @@ class _HomePacienteState extends State<HomePaciente> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => EmergenciaPaciente()),
+                      MaterialPageRoute(
+                        builder: (context) => EmergenciaPaciente(),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -410,7 +430,7 @@ class _HomePacienteState extends State<HomePaciente> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            
+
             // Exibir tarefas de hoje
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
@@ -428,37 +448,41 @@ class _HomePacienteState extends State<HomePaciente> {
                   id: tarefa['id'].toString(),
                   onTap: () {},
                 ),
-              
+
               // Medicamentos
               for (final medicamento in medicamentosDeHoje)
                 _buildInfoCardComStatus(
                   context: context,
                   icon: Icons.medical_services_outlined,
                   title: medicamento['medicamento_nome'] ?? 'Medicamento',
-                  subtitle: '${medicamento['dosagem'] ?? 'Dosagem não informada'} - ${_formatarDataHora(medicamento['data_hora'] ?? '')}',
+                  subtitle:
+                      '${medicamento['dosagem'] ?? 'Dosagem não informada'} - ${_formatarDataHora(medicamento['data_hora'] ?? '')}',
                   iconColor: const Color.fromARGB(255, 106, 186, 213),
                   status: medicamento['status'] ?? 'pendente',
                   tipo: 'medicamento',
                   id: medicamento['id'].toString(),
                   onTap: () {},
                 ),
-              
+
               // Consultas
               for (final consulta in consultasDeHoje)
                 _buildInfoCardComStatus(
                   context: context,
                   icon: Icons.person_pin_outlined,
                   title: consulta['especialidade'] ?? 'Consulta',
-                  subtitle: '${consulta['medico_nome'] ?? 'Médico'} - ${_formatarDataHora(consulta['hora_consulta'] ?? '')}',
+                  subtitle:
+                      '${consulta['medico_nome'] ?? 'Médico'} - ${_formatarDataHora(consulta['hora_consulta'] ?? '')}',
                   iconColor: const Color.fromARGB(255, 106, 186, 213),
                   status: consulta['status'] ?? 'pendente',
                   tipo: 'consulta',
                   id: consulta['id'].toString(),
                   onTap: () {},
                 ),
-              
+
               // Mensagem quando não há atribuições
-              if (tarefasDeHoje.isEmpty && medicamentosDeHoje.isEmpty && consultasDeHoje.isEmpty)
+              if (tarefasDeHoje.isEmpty &&
+                  medicamentosDeHoje.isEmpty &&
+                  consultasDeHoje.isEmpty)
                 _buildInfoCard(
                   context: context,
                   icon: Icons.check_circle_outline,
@@ -468,7 +492,7 @@ class _HomePacienteState extends State<HomePaciente> {
                   onTap: () {},
                 ),
             ],
-            
+
             const SizedBox(height: 100),
           ],
         ),
@@ -477,79 +501,79 @@ class _HomePacienteState extends State<HomePaciente> {
     );
   }
 
-PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
-  return AppBar(
-    toolbarHeight: 100,
-    backgroundColor: const Color.fromARGB(0, 25, 190, 25),
-    elevation: 0,
-    automaticallyImplyLeading: false, // ← LINHA ADICIONADA AQUI
-    flexibleSpace: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 106, 186, 213),
-            Color.fromARGB(255, 106, 186, 213),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
+    return AppBar(
+      toolbarHeight: 100,
+      backgroundColor: const Color.fromARGB(0, 25, 190, 25),
+      elevation: 0,
+      automaticallyImplyLeading: false, // ← LINHA ADICIONADA AQUI
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 106, 186, 213),
+              Color.fromARGB(255, 106, 186, 213),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PerfilPaciente()),
-                );
-              },
-              child: Row(
-                children: [
-                  // Avatar com inicial do nome
-                  CircleAvatar(
-                    backgroundColor: avatarColor,
-                    radius: 24,
-                    child: Text(
-                      inicial,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PerfilPaciente()),
+                  );
+                },
+                child: Row(
+                  children: [
+                    // Avatar com inicial do nome
+                    CircleAvatar(
+                      backgroundColor: avatarColor,
+                      radius: 24,
+                      child: Text(
+                        inicial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          'Bem-vindo, ${_pacienteData['nome'] ?? 'Paciente'}.',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    const SizedBox(width: 12),
+                    _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Bem-vindo, ${_pacienteData['nome'] ?? 'Paciente'}.',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.notifications_none, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Notificacoes()),
-                );
-              },
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.notifications_none, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Notificacoes()),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildInfoCard({
     required BuildContext context,
@@ -562,9 +586,7 @@ PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -580,7 +602,10 @@ PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(subtitle),
@@ -613,9 +638,7 @@ PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -631,14 +654,20 @@ PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(subtitle),
                     const SizedBox(height: 8),
                     // Badge de status
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -683,23 +712,48 @@ PreferredSizeWidget _buildAppBar(Color avatarColor, String inicial) {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           IconButton(
-            icon: Icon(Icons.calendar_today_outlined, color: _selectedIndex == 0 ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey),
+            icon: Icon(
+              Icons.calendar_today_outlined,
+              color: _selectedIndex == 0
+                  ? const Color.fromARGB(255, 106, 186, 213)
+                  : Colors.grey,
+            ),
             onPressed: () => _onItemTapped(0),
           ),
           IconButton(
-            icon: Icon(Icons.mail_outline, color: _selectedIndex == 1 ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey),
+            icon: Icon(
+              Icons.mail_outline,
+              color: _selectedIndex == 1
+                  ? const Color.fromARGB(255, 106, 186, 213)
+                  : Colors.grey,
+            ),
             onPressed: () => _onItemTapped(1),
           ),
           IconButton(
-            icon: Icon(Icons.home, color: _selectedIndex == 2 ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey),
+            icon: Icon(
+              Icons.home,
+              color: _selectedIndex == 2
+                  ? const Color.fromARGB(255, 106, 186, 213)
+                  : Colors.grey,
+            ),
             onPressed: () => _onItemTapped(2),
           ),
           IconButton(
-            icon: Icon(Icons.sentiment_satisfied_outlined, color: _selectedIndex == 3 ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey),
+            icon: Icon(
+              Icons.sentiment_satisfied_outlined,
+              color: _selectedIndex == 3
+                  ? const Color.fromARGB(255, 106, 186, 213)
+                  : Colors.grey,
+            ),
             onPressed: () => _onItemTapped(3),
           ),
           IconButton(
-            icon: Icon(Icons.sick_outlined, color: _selectedIndex == 4 ? const Color.fromARGB(255, 106, 186, 213) : Colors.grey),
+            icon: Icon(
+              Icons.sick_outlined,
+              color: _selectedIndex == 4
+                  ? const Color.fromARGB(255, 106, 186, 213)
+                  : Colors.grey,
+            ),
             onPressed: () => _onItemTapped(4),
           ),
         ],

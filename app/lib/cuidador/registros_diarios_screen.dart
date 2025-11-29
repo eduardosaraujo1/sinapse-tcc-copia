@@ -1,8 +1,8 @@
 import 'package:algumacoisa/cuidador/sentimentos_paciente_screen.dart';
+import '../config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'sentimentos_paciente_screen.dart';
 
 class RegistrosDiariosScreen extends StatefulWidget {
   final dynamic paciente;
@@ -42,16 +42,14 @@ class _RegistrosDiariosScreenState extends State<RegistrosDiariosScreen> {
       };
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/registrosdiarios/novo'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('${Config.apiUrl}/api/registrosdiarios/novo'),
+        headers: {'Content-Type': 'application/json'},
         body: json.encode(requestBody),
       );
 
       if (response.statusCode == 201) {
         final Map<String, dynamic> data = json.decode(response.body);
-        
+
         if (data['success'] == true) {
           _navegarParaSentimentos();
         } else {
@@ -71,21 +69,20 @@ class _RegistrosDiariosScreenState extends State<RegistrosDiariosScreen> {
 
   void _mostrarErro(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
-void _navegarParaSentimentos() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => SentimentosPacienteScreen(paciente: widget.paciente), // Adicione o paciente aqui
-    ),
-  );
-}
+  void _navegarParaSentimentos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SentimentosPacienteScreen(
+          paciente: widget.paciente,
+        ), // Adicione o paciente aqui
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +123,7 @@ void _navegarParaSentimentos() {
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _salvarRegistro,
-            child: _isLoading 
+            child: _isLoading
                 ? SizedBox(
                     width: 20,
                     height: 20,
@@ -152,13 +149,12 @@ void _navegarParaSentimentos() {
                   SizedBox(height: 8),
                   Text(
                     widget.paciente.nome,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  Text(widget.paciente.idade ?? 'Idade não informada', 
-                      style: TextStyle(color: Colors.grey)),
+                  Text(
+                    widget.paciente.idade ?? 'Idade não informada',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
@@ -232,22 +228,24 @@ void _navegarParaSentimentos() {
   Widget _buildCheckboxRow(List<String> titles) {
     return Row(
       children: titles
-          .map((title) => Expanded(
-                child: CheckboxListTile(
-                  title: Text(title),
-                  value: _selectedActivities.contains(title),
-                  onChanged: (bool? value) {
-                    setState(() {
-                      if (value == true) {
-                        _selectedActivities.add(title);
-                      } else {
-                        _selectedActivities.remove(title);
-                      }
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-              ))
+          .map(
+            (title) => Expanded(
+              child: CheckboxListTile(
+                title: Text(title),
+                value: _selectedActivities.contains(title),
+                onChanged: (bool? value) {
+                  setState(() {
+                    if (value == true) {
+                      _selectedActivities.add(title);
+                    } else {
+                      _selectedActivities.remove(title);
+                    }
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+            ),
+          )
           .toList(),
     );
   }

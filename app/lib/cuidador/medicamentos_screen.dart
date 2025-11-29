@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class MedicamentosScreen extends StatefulWidget {
   const MedicamentosScreen({super.key});
@@ -23,8 +26,10 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
 
   Future<void> _carregarPacientesComMedicamentos() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8000/api/cuidador/PacienteComMedicamentos'));
-      
+      final response = await http.get(
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComMedicamentos'),
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success']) {
@@ -50,11 +55,11 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
   Future<void> _atualizarStatusMedicamento(String id, String status) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/api/medicamento/$id/status'),
+        Uri.parse('${Config.apiUrl}/api/medicamento/$id/status'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'status': status}),
       );
-      
+
       if (response.statusCode == 200) {
         _carregarPacientesComMedicamentos(); // Recarrega os dados
         _mostrarSucessoSnackbar('Status atualizado com sucesso!');
@@ -75,10 +80,13 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
         pacientesFiltrados = pacientes.where((paciente) {
           final nome = paciente['nome'].toString().toLowerCase();
           final medicamentos = paciente['medicamentos'] ?? [];
-          
-          final temMedicamentoComNome = medicamentos.any((med) => 
-              med['medicamento_nome'].toString().toLowerCase().contains(query.toLowerCase()));
-          
+
+          final temMedicamentoComNome = medicamentos.any(
+            (med) => med['medicamento_nome'].toString().toLowerCase().contains(
+              query.toLowerCase(),
+            ),
+          );
+
           return nome.contains(query.toLowerCase()) || temMedicamentoComNome;
         }).toList();
       }
@@ -87,19 +95,13 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
 
   void _mostrarErroSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
     );
   }
 
   void _mostrarSucessoSnackbar(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.green),
     );
   }
 
@@ -158,8 +160,10 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
       Colors.indigo,
       Colors.amber,
     ];
-    
-    if (letra.isEmpty || letra == '?') return const Color.fromARGB(255, 0, 0, 0);
+
+    if (letra.isEmpty || letra == '?') {
+      return const Color.fromARGB(255, 0, 0, 0);
+    }
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -247,11 +251,7 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
             ),
             SizedBox(height: 16),
             if (isLoading)
-              Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              )
+              Expanded(child: Center(child: CircularProgressIndicator()))
             else if (pacientesFiltrados.isEmpty && searchQuery.isNotEmpty)
               Expanded(
                 child: Center(
@@ -287,7 +287,11 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                     itemBuilder: (context, index) {
                       final paciente = pacientesFiltrados[index];
                       final medicamentos = paciente['medicamentos'] ?? [];
-                      return _buildPacienteCard(context, paciente, medicamentos);
+                      return _buildPacienteCard(
+                        context,
+                        paciente,
+                        medicamentos,
+                      );
                     },
                   ),
                 ),
@@ -298,7 +302,11 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
     );
   }
 
-  Widget _buildPacienteCard(BuildContext context, dynamic paciente, List<dynamic> medicamentos) {
+  Widget _buildPacienteCard(
+    BuildContext context,
+    dynamic paciente,
+    List<dynamic> medicamentos,
+  ) {
     final inicial = _getInicial(paciente['nome'] ?? '');
     final avatarColor = _getAvatarColor(inicial);
 
@@ -331,7 +339,10 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                     children: [
                       Text(
                         paciente['nome'] ?? 'Nome não informado',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       if (paciente['idade'] != null)
                         Text(
@@ -354,7 +365,10 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'Nenhum medicamento cadastrado',
-                  style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               )
             else
@@ -366,7 +380,9 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(height: 8),
-                  ...medicamentos.map((medicamento) => _buildMedicamentoItem(medicamento)).toList(),
+                  ...medicamentos.map(
+                    (medicamento) => _buildMedicamentoItem(medicamento),
+                  ),
                 ],
               ),
           ],
@@ -377,7 +393,7 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
 
   Widget _buildMedicamentoItem(dynamic medicamento) {
     final status = medicamento['status'] ?? 'pendente';
-    
+
     return Card(
       margin: EdgeInsets.only(bottom: 8),
       elevation: 1,
@@ -393,17 +409,24 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    medicamento['medicamento_nome'] ?? 'Medicamento não informado',
+                    medicamento['medicamento_nome'] ??
+                        'Medicamento não informado',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 4),
                   Text(
                     'Dosagem: ${medicamento['dosagem'] ?? 'Não informada'}',
-                    style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 0, 0, 0)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                    ),
                   ),
                   Text(
                     'Data: ${_formatarDataHora(medicamento['data_hora'])}',
-                    style: TextStyle(fontSize: 12, color: const Color.fromARGB(255, 0, 0, 0)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                    ),
                   ),
                 ],
               ),
@@ -429,7 +452,8 @@ class _MedicamentosScreenState extends State<MedicamentosScreen> {
                 SizedBox(height: 8),
                 IconButton(
                   icon: Icon(Icons.edit, size: 18),
-                  onPressed: () => _mostrarDialogoStatusMedicamento(medicamento),
+                  onPressed: () =>
+                      _mostrarDialogoStatusMedicamento(medicamento),
                   tooltip: 'Alterar status',
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),

@@ -1,14 +1,18 @@
+import 'dart:convert';
+
+import 'package:algumacoisa/cuidador/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; 
-import 'package:algumacoisa/cuidador/login_screen.dart'; 
+
+import '../config.dart';
 
 // --- CONFIGURAÇÃO DA API ---
-const String professionalDataApiUrl = 'http://localhost:8000/api/cuidador/profissional'; 
+const String professionalDataApiUrl =
+    '${Config.apiUrl}/api/cuidador/profissional';
 
 class RegisterStep4Screen extends StatefulWidget {
-  final int? cuidadorId; 
-  
+  final int? cuidadorId;
+
   const RegisterStep4Screen({super.key, this.cuidadorId});
 
   @override
@@ -17,7 +21,8 @@ class RegisterStep4Screen extends StatefulWidget {
 
 class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
   // Controladores e Chave do Formulário
-  final TextEditingController _registrationNumberController = TextEditingController();
+  final TextEditingController _registrationNumberController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   // Variáveis de Estado
@@ -34,19 +39,22 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
   // --- FUNÇÃO DE SUBMISSÃO SIMPLES VIA JSON ---
   Future<void> _submitProfessionalData() async {
     if (!_formKey.currentState!.validate()) {
-      return; 
+      return;
     }
-    
+
     // Validações adicionais
     if (_selectedFormacao == null) {
-       return _showError('Selecione sua formação profissional.');
+      return _showError('Selecione sua formação profissional.');
     }
     if (!_isAptoChecked) {
-       return _showError('Você deve declarar que as informações são verdadeiras.');
+      return _showError(
+        'Você deve declarar que as informações são verdadeiras.',
+      );
     }
-    
-    final String cuidadorId = widget.cuidadorId?.toString() ?? '1'; // Usando '1' como fallback
-    
+
+    final String cuidadorId =
+        widget.cuidadorId?.toString() ?? '1'; // Usando '1' como fallback
+
     setState(() => _isLoading = true);
 
     try {
@@ -68,20 +76,24 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
       if (response.statusCode == 201 || response.statusCode == 200) {
         // Sucesso
         if (mounted) {
-          _showSuccess('Informações profissionais enviadas com sucesso! Aguarde a validação.');
+          _showSuccess(
+            'Informações profissionais enviadas com sucesso! Aguarde a validação.',
+          );
           // Navega para a tela de Login
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LoginUnificadoScreen()),
+            MaterialPageRoute(
+              builder: (context) => const LoginUnificadoScreen(),
+            ),
           );
         }
       } else {
         // Falha no servidor
         final responseBody = json.decode(response.body);
-        final errorMessage = responseBody['error'] ?? 'Erro no servidor: ${response.statusCode}';
+        final errorMessage =
+            responseBody['error'] ?? 'Erro no servidor: ${response.statusCode}';
         throw Exception(errorMessage);
       }
-      
     } catch (e) {
       print('Erro ao enviar dados profissionais: $e');
       if (mounted) {
@@ -93,32 +105,32 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
       }
     }
   }
-  
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
-  
+
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.green),
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
   }
 
   // Estilos de Decoração
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: const Color(0xFF6ABAD5).withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFF6ABAD5).withOpacity(0.1),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: BorderSide.none,
+      ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,7 +164,7 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                Image.asset('assets/image-removebg-preview.png', height: 100), 
+                Image.asset('assets/image-removebg-preview.png', height: 100),
                 const SizedBox(height: 10),
                 const Text(
                   "Complete seu perfil",
@@ -171,21 +183,25 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Campo de Formação
                 const Text(
                   'Formação *',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: _selectedFormacao,
-                  validator: (value) => value == null ? 'Selecione uma formação.' : null,
+                  initialValue: _selectedFormacao,
+                  validator: (value) =>
+                      value == null ? 'Selecione uma formação.' : null,
                   items: ['Enfermagem', 'Fisioterapia', 'Cuidador de Idosos']
-                      .map((value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ))
+                      .map(
+                        (value) =>
+                            DropdownMenuItem(value: value, child: Text(value)),
+                      )
                       .toList(),
                   onChanged: (value) {
                     setState(() {
@@ -194,13 +210,16 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                   },
                   decoration: _inputDecoration('Selecione Sua Formação'),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Campo de Número de Registro Profissional
                 const Text(
                   'Número De Registro Profissional',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -210,7 +229,6 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                 const SizedBox(height: 20),
 
                 // A seção de upload de arquivo foi removida.
-                
                 const SizedBox(height: 10),
 
                 // Declaração de informações
@@ -218,7 +236,7 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Checkbox(
-                      value: _isAptoChecked, 
+                      value: _isAptoChecked,
                       onChanged: (value) {
                         setState(() {
                           _isAptoChecked = value ?? false;
@@ -234,9 +252,9 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Botão Enviar
                 SizedBox(
                   width: double.infinity,
@@ -253,7 +271,10 @@ class _RegisterStep4ScreenState extends State<RegisterStep4Screen> {
                         ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Text(
                             "Enviar",

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class MedicamentosFamiliar extends StatefulWidget {
   const MedicamentosFamiliar({super.key});
@@ -31,9 +34,9 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
       });
 
       print('🔄 Iniciando carregamento de medicamentos...');
-      
+
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteComMedicamentos'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComMedicamentos'),
       );
 
       print('📡 Status da resposta: ${response.statusCode}');
@@ -41,24 +44,30 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         print('✅ API retornou success: ${data['success']}');
         print('📊 Total de pacientes: ${data['data']?.length}');
-        
+
         if (data['success'] == true) {
           // Debug: Verificar estrutura dos dados
           if (data['data'] != null && data['data'].isNotEmpty) {
             print('🔍 Estrutura do primeiro paciente:');
             print('Nome: ${data['data'][0]['nome']}');
-            print('Tem medicamentos: ${data['data'][0]['medicamentos'] != null}');
+            print(
+              'Tem medicamentos: ${data['data'][0]['medicamentos'] != null}',
+            );
             if (data['data'][0]['medicamentos'] != null) {
-              print('Número de medicamentos: ${data['data'][0]['medicamentos'].length}');
+              print(
+                'Número de medicamentos: ${data['data'][0]['medicamentos'].length}',
+              );
               if (data['data'][0]['medicamentos'].isNotEmpty) {
-                print('Primeiro medicamento: ${data['data'][0]['medicamentos'][0]}');
+                print(
+                  'Primeiro medicamento: ${data['data'][0]['medicamentos'][0]}',
+                );
               }
             }
           }
-          
+
           setState(() {
             pacientesComMedicamentos = data['data'];
             pacientesFiltrados = List.from(pacientesComMedicamentos);
@@ -92,11 +101,17 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
       } else {
         pacientesFiltrados = pacientesComMedicamentos.where((paciente) {
           final nome = paciente['nome']?.toString().toLowerCase() ?? '';
-          final medicamento = paciente['medicamentos']?.any((med) => 
-            med['medicamento_nome']?.toString().toLowerCase().contains(query.toLowerCase()) ?? false
-          ) ?? false;
+          final medicamento =
+              paciente['medicamentos']?.any(
+                (med) =>
+                    med['medicamento_nome']?.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ??
+                    false,
+              ) ??
+              false;
           final searchLower = query.toLowerCase();
-          
+
           return nome.contains(searchLower) || medicamento;
         }).toList();
       }
@@ -189,7 +204,8 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      medicamento['medicamento_nome']?.toString() ?? 'Medicamento não informado',
+                      medicamento['medicamento_nome']?.toString() ??
+                          'Medicamento não informado',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -197,10 +213,7 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                     ),
                     Text(
                       'Dosagem: ${medicamento['dosagem'] ?? 'Não informada'}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                     ),
                   ],
                 ),
@@ -217,7 +230,8 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        (medicamento['status']?.toString().toUpperCase() ?? 'PENDENTE'),
+                        (medicamento['status']?.toString().toUpperCase() ??
+                            'PENDENTE'),
                         style: TextStyle(
                           color: _getStatusColor(medicamento['status']),
                           fontSize: 10,
@@ -243,10 +257,7 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
           if (medicamento['data_hora'] != null)
             Text(
               'Próxima dose: ${_formatarDataHora(medicamento['data_hora'])}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           const SizedBox(height: 8),
         ],
@@ -282,7 +293,9 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                 prefixIcon: const Icon(Icons.search),
                 hintText: 'Buscar paciente ou medicamento...',
                 contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 16.0),
+                  vertical: 16.0,
+                  horizontal: 16.0,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                   borderSide: BorderSide.none,
@@ -302,7 +315,7 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
               onChanged: _filtrarMedicamentos,
             ),
             const SizedBox(height: 20),
-            
+
             if (isLoading)
               const Expanded(
                 child: Center(
@@ -322,18 +335,11 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
+                      Icon(Icons.error_outline, size: 64, color: Colors.red),
                       SizedBox(height: 16),
                       Text(
                         errorMessage,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.red, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16),
@@ -361,10 +367,7 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                         _searchController.text.isEmpty
                             ? 'Nenhum medicamento agendado'
                             : 'Nenhum medicamento encontrado para a busca',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -377,10 +380,13 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                   itemCount: pacientesFiltrados.length,
                   itemBuilder: (context, index) {
                     final paciente = pacientesFiltrados[index];
-                    final medicamentos = paciente['medicamentos'] as List<dynamic>? ?? [];
-                    
-                    print('🎯 Renderizando paciente: ${paciente['nome']} com ${medicamentos.length} medicamentos');
-                    
+                    final medicamentos =
+                        paciente['medicamentos'] as List<dynamic>? ?? [];
+
+                    print(
+                      '🎯 Renderizando paciente: ${paciente['nome']} com ${medicamentos.length} medicamentos',
+                    );
+
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.only(bottom: 15),
@@ -397,7 +403,11 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                               radius: 25,
                               backgroundColor: Colors.blue[100],
                               child: Text(
-                                paciente['nome']?.toString().substring(0, 1).toUpperCase() ?? '?',
+                                paciente['nome']
+                                        ?.toString()
+                                        .substring(0, 1)
+                                        .toUpperCase() ??
+                                    '?',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue,
@@ -405,7 +415,8 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                               ),
                             ),
                             title: Text(
-                              paciente['nome']?.toString() ?? 'Paciente não identificado',
+                              paciente['nome']?.toString() ??
+                                  'Paciente não identificado',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -417,7 +428,9 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                                 if (paciente['idade'] != null)
                                   Text('Idade: ${paciente['idade']} anos'),
                                 if (paciente['tipo_sanguineo'] != null)
-                                  Text('Tipo Sanguíneo: ${paciente['tipo_sanguineo']}'),
+                                  Text(
+                                    'Tipo Sanguíneo: ${paciente['tipo_sanguineo']}',
+                                  ),
                                 Text(
                                   '${medicamentos.length} medicamento(s)',
                                   style: TextStyle(
@@ -428,16 +441,21 @@ class _MedicamentosFamiliarState extends State<MedicamentosFamiliar> {
                               ],
                             ),
                           ),
-                          
+
                           // Lista de medicamentos do paciente
                           if (medicamentos.isNotEmpty)
                             ...medicamentos.asMap().entries.map((entry) {
                               final medIndex = entry.key;
                               final medicamento = entry.value;
-                              
-                              print('💊 Renderizando medicamento: ${medicamento['medicamento_nome']}');
-                              return _buildMedicamentoCard(medicamento, medIndex);
-                            }).toList()
+
+                              print(
+                                '💊 Renderizando medicamento: ${medicamento['medicamento_nome']}',
+                              );
+                              return _buildMedicamentoCard(
+                                medicamento,
+                                medIndex,
+                              );
+                            })
                           else
                             const Padding(
                               padding: EdgeInsets.all(16.0),

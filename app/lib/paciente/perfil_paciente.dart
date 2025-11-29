@@ -4,11 +4,11 @@ import 'package:algumacoisa/paciente/MeuPerfil_paciente.dart';
 import 'package:algumacoisa/paciente/configuracoes_screen.dart';
 import 'package:algumacoisa/paciente/historicoregistro_paciente.dart';
 import 'package:algumacoisa/paciente/home_paciente.dart';
-import 'package:algumacoisa/paciente/infoPessoais_paciente.dart';
 import 'package:algumacoisa/paciente/meucuidador_paciente.dart';
-import 'package:algumacoisa/paciente/politica_privacidade_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../config.dart';
 
 class PerfilPaciente extends StatefulWidget {
   const PerfilPaciente({super.key});
@@ -34,7 +34,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
   Future<void> _carregarPerfil() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/paciente/perfil'),
+        Uri.parse('${Config.apiUrl}/api/paciente/perfil'),
       );
 
       if (response.statusCode == 200) {
@@ -58,7 +58,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
 
   // Função para obter a letra inicial do nome
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -74,9 +74,9 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -86,7 +86,10 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
     final nomeCompleto = _perfilData['nome'] ?? '';
     final inicial = _getInicial(nomeCompleto);
     final avatarColor = _getAvatarColor(inicial);
-    final nomeExibicao = nomeCompleto.isNotEmpty ? nomeCompleto.split(' ').first : 'Paciente';
+    // ignore: unused_local_variable
+    final nomeExibicao = nomeCompleto.isNotEmpty
+        ? nomeCompleto.split(' ').first
+        : 'Paciente';
 
     return Scaffold(
       appBar: AppBar(
@@ -107,7 +110,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
+
             // Avatar com loading
             if (_isLoading)
               const CircleAvatar(
@@ -142,14 +145,18 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
                     child: CircleAvatar(
                       radius: 15,
                       backgroundColor: corPrincipal,
-                      child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                      child: const Icon(
+                        Icons.edit,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
-            
+
             const SizedBox(height: 10),
-            
+
             // Nome com loading
             if (_isLoading)
               const Text(
@@ -160,17 +167,22 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
               Text(
                 'Erro ao carregar',
                 style: TextStyle(
-                  fontSize: 24, 
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red
+                  color: Colors.red,
                 ),
               )
             else
               Column(
                 children: [
                   Text(
-                    nomeCompleto.isNotEmpty ? nomeCompleto : 'Nome não informado',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    nomeCompleto.isNotEmpty
+                        ? nomeCompleto
+                        : 'Nome não informado',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   // Email (se disponível)
@@ -184,9 +196,9 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
                     ),
                 ],
               ),
-            
+
             const SizedBox(height: 30),
-            
+
             _buildProfileItem(
               context,
               icon: Icons.person_outline,
@@ -198,7 +210,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
                 );
               },
             ),
-         
+
             _buildProfileItem(
               context,
               icon: Icons.favorite_border,
@@ -217,11 +229,13 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HistoricoDeRegistros()),
+                  MaterialPageRoute(
+                    builder: (context) => HistoricoDeRegistros(),
+                  ),
                 );
               },
             ),
-  
+
             _buildProfileItem(
               context,
               icon: Icons.settings_outlined,
@@ -229,7 +243,9 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ConfiguracoesPaciente()),
+                  MaterialPageRoute(
+                    builder: (context) => ConfiguracoesPaciente(),
+                  ),
                 );
               },
             ),
@@ -241,7 +257,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
                 _showLogoutDialog(context);
               },
             ),
-            
+
             // Botão para recarregar em caso de erro
             if (_errorMessage.isNotEmpty)
               Padding(
@@ -280,7 +296,9 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
                 Navigator.of(context).pop();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginUnificadoScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => LoginUnificadoScreen(),
+                  ),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -292,7 +310,12 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildProfileItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -301,9 +324,7 @@ class _PerfilPacienteState extends State<PerfilPaciente> {
           children: [
             Icon(icon, color: corPrincipal),
             const SizedBox(width: 20),
-            Expanded(
-              child: Text(label, style: const TextStyle(fontSize: 16)),
-            ),
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
             const Icon(Icons.arrow_forward_ios, size: 16),
           ],
         ),

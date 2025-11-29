@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // Necessário para converter JSON
-import 'package:http/http.dart' as http; // Necessário para requisições HTTP
+import 'package:http/http.dart' as http;
+
+import '../config.dart'; // Necessário para requisições HTTP
 
 // Modelo de Dados do Cuidador (Mantenha este modelo)
 class CaregiverModel {
@@ -28,7 +30,9 @@ class CaregiverModel {
       dataNascimento: json['data_nascimento'] ?? 'Não informada',
       endereco: json['endereco'] ?? 'Não informado',
       infoFisicas: json['info_fisicas'] ?? 'Sem informações físicas',
-      fotoUrl: json['foto_url'] ?? 'assets/placeholder.png', // Substitua por um asset padrão
+      fotoUrl:
+          json['foto_url'] ??
+          'assets/placeholder.png', // Substitua por um asset padrão
     );
   }
 }
@@ -37,7 +41,7 @@ class MeuCuidador extends StatefulWidget {
   const MeuCuidador({super.key});
 
   @override
-  State<MeuCuidador> createState() =>_MeuCuidadorState();
+  State<MeuCuidador> createState() => _MeuCuidadorState();
 }
 
 class _MeuCuidadorState extends State<MeuCuidador> {
@@ -56,7 +60,7 @@ class _MeuCuidadorState extends State<MeuCuidador> {
 
   // Função para obter a letra inicial do nome
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -72,9 +76,9 @@ class _MeuCuidadorState extends State<MeuCuidador> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -87,9 +91,8 @@ class _MeuCuidadorState extends State<MeuCuidador> {
     });
 
     try {
-  
-      const String urlApi = 'http://localhost:8000/api/cuidador/perfil'; 
-      
+      const String urlApi = '${Config.apiUrl}/api/cuidador/perfil';
+
       final response = await http.get(Uri.parse(urlApi));
 
       if (response.statusCode == 200) {
@@ -101,14 +104,14 @@ class _MeuCuidadorState extends State<MeuCuidador> {
           _caregiverData = realData;
           _isLoading = false;
         });
-
       } else if (response.statusCode == 404) {
         throw Exception('Perfil não encontrado (código 404).');
       } else {
         // Tratar outros erros do servidor (500, etc.)
-        throw Exception('Falha ao carregar dados. Status: ${response.statusCode}');
+        throw Exception(
+          'Falha ao carregar dados. Status: ${response.statusCode}',
+        );
       }
-      
     } catch (e) {
       // Captura erros de conexão ou exceções lançadas
       setState(() {
@@ -212,13 +215,15 @@ class _MeuCuidadorState extends State<MeuCuidador> {
             _buildInfoSection('Data de Nascimento', caregiver.dataNascimento),
             _buildInfoSection('Endereço', caregiver.endereco),
             _buildInfoSection('Informações Físicas', caregiver.infoFisicas),
-            
+
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Aqui você passaria o objeto 'caregiver' para a tela de edição
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Navegar para Tela de Edição (Implementar)')),
+                  const SnackBar(
+                    content: Text('Navegar para Tela de Edição (Implementar)'),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -238,7 +243,7 @@ class _MeuCuidadorState extends State<MeuCuidador> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title, 
+          title,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -248,10 +253,7 @@ class _MeuCuidadorState extends State<MeuCuidador> {
         const SizedBox(height: 5),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 16, color: Colors.black54),
         ),
         const Divider(),
         const SizedBox(height: 10),

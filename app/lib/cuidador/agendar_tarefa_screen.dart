@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/tarefa1.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class AgendarTarefaScreen extends StatefulWidget {
   const AgendarTarefaScreen({super.key});
@@ -15,7 +18,7 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
   String? _selectedTime;
   final TextEditingController _descricaoController = TextEditingController();
   final TextEditingController _motivoController = TextEditingController();
-  
+
   bool _isLoading = false;
 
   Future<void> _salvarTarefa() async {
@@ -45,7 +48,7 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
       final Map<String, dynamic> tarefaData = {
         'cuidador_id': 1, // ID do cuidador logado
         'paciente_id': 1,
-        
+
         'descricao': _descricaoController.text,
         'motivacao': _motivoController.text,
         'data_tarefa': selectedDateTime.toIso8601String(),
@@ -54,7 +57,7 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
       print('Enviando dados da tarefa: $tarefaData');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteTarefa'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteTarefa'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -64,7 +67,7 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
       if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
         print('Tarefa agendada com sucesso: ${responseData['tarefa']}');
-        
+
         // Navegar para seleção de paciente passando os dados da tarefa
         Navigator.push(
           context,
@@ -82,12 +85,11 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
         print('Erro na resposta: ${errorData['error']}');
         _mostrarSnackBar('Erro: ${errorData['error']}');
       }
-
     } catch (e) {
       print('Erro ao conectar ou enviar dados: $e');
       _mostrarSnackBar('Erro de conexão. Verifique sua rede.');
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -96,9 +98,9 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
   }
 
   void _mostrarSnackBar(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override
@@ -149,15 +151,21 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: ElevatedButton(
-                  onPressed: (_selectedTime != null && 
-                            _descricaoController.text.isNotEmpty && 
-                            _motivoController.text.isNotEmpty && 
-                            !_isLoading) ? _salvarTarefa : null,
+                  onPressed:
+                      (_selectedTime != null &&
+                          _descricaoController.text.isNotEmpty &&
+                          _motivoController.text.isNotEmpty &&
+                          !_isLoading)
+                      ? _salvarTarefa
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: (_selectedTime != null && 
-                                    _descricaoController.text.isNotEmpty && 
-                                    _motivoController.text.isNotEmpty && 
-                                    !_isLoading) ? corPrincipal : Colors.grey[400],
+                    backgroundColor:
+                        (_selectedTime != null &&
+                            _descricaoController.text.isNotEmpty &&
+                            _motivoController.text.isNotEmpty &&
+                            !_isLoading)
+                        ? corPrincipal
+                        : Colors.grey[400],
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -168,7 +176,9 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                             strokeWidth: 3,
                           ),
                         )
@@ -191,7 +201,7 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
 
   Widget _buildTextField(String label, TextEditingController controller) {
     const Color corPrincipal = Color(0xFF6ABAD5);
-    
+
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -288,7 +298,8 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
             final isCurrentMonthDay = day.isNotEmpty;
             final dayInt = isCurrentMonthDay ? int.parse(day) : -1;
 
-            final isSelected = isCurrentMonthDay &&
+            final isSelected =
+                isCurrentMonthDay &&
                 dayInt == _selectedDate.day &&
                 month == _selectedDate.month &&
                 year == _selectedDate.year;
@@ -296,7 +307,9 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
             final DateTime currentDayDate = isCurrentMonthDay
                 ? DateTime(year, month, dayInt)
                 : DateTime.now().add(Duration(days: 9999));
-            final bool isPastDate = currentDayDate.isBefore(DateTime.now().subtract(Duration(days: 1)));
+            final bool isPastDate = currentDayDate.isBefore(
+              DateTime.now().subtract(Duration(days: 1)),
+            );
 
             return GestureDetector(
               onTap: isCurrentMonthDay && !isPastDate
@@ -310,7 +323,9 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? corPrincipal.withOpacity(0.1) : Colors.transparent,
+                    color: isSelected
+                        ? corPrincipal.withOpacity(0.1)
+                        : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   padding: EdgeInsets.all(8),
@@ -320,9 +335,13 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
                       color: isSelected
                           ? corPrincipal
                           : (isPastDate
-                              ? Colors.grey.shade400
-                              : (isCurrentMonthDay ? Colors.black : Colors.transparent)),
-                      fontWeight: isSelected || isCurrentMonthDay ? FontWeight.bold : FontWeight.normal,
+                                ? Colors.grey.shade400
+                                : (isCurrentMonthDay
+                                      ? Colors.black
+                                      : Colors.transparent)),
+                      fontWeight: isSelected || isCurrentMonthDay
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -337,8 +356,15 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
   Widget _buildTimeGrid() {
     const Color corPrincipal = Color(0xFF6ABAD5);
     final times = [
-      '8:00', '9:00', '11:00', '12:00',
-      '14:00', '15:00', '17:00', '18:00', '19:00'
+      '8:00',
+      '9:00',
+      '11:00',
+      '12:00',
+      '14:00',
+      '15:00',
+      '17:00',
+      '18:00',
+      '19:00',
     ];
 
     return GridView.builder(
@@ -362,9 +388,13 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
             });
           },
           style: OutlinedButton.styleFrom(
-            backgroundColor: isSelected ? corPrincipal.withOpacity(0.1) : Colors.white,
+            backgroundColor: isSelected
+                ? corPrincipal.withOpacity(0.1)
+                : Colors.white,
             side: BorderSide(
-              color: isSelected ? Colors.transparent : corPrincipal.withOpacity(0.4),
+              color: isSelected
+                  ? Colors.transparent
+                  : corPrincipal.withOpacity(0.4),
               width: 1.5,
             ),
             shape: RoundedRectangleBorder(
@@ -384,8 +414,18 @@ class _AgendarTarefaScreenState extends State<AgendarTarefaScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      "Janeiro",
+      "Fevereiro",
+      "Março",
+      "Abril",
+      "Maio",
+      "Junho",
+      "Julho",
+      "Agosto",
+      "Setembro",
+      "Outubro",
+      "Novembro",
+      "Dezembro",
     ];
     return months[month - 1];
   }

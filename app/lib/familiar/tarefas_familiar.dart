@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class TarefasFamiliar extends StatefulWidget {
   const TarefasFamiliar({super.key});
@@ -31,9 +34,9 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
       });
 
       print('🔄 Iniciando carregamento de tarefas...');
-      
+
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteComTarefas'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteComTarefas'),
       );
 
       print('📡 Status da resposta: ${response.statusCode}');
@@ -41,10 +44,10 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         print('✅ API retornou success: ${data['success']}');
         print('📊 Total de pacientes: ${data['data']?.length}');
-        
+
         if (data['success'] == true) {
           // Debug: Verificar estrutura dos dados
           if (data['data'] != null && data['data'].isNotEmpty) {
@@ -58,7 +61,7 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
               }
             }
           }
-          
+
           setState(() {
             pacientesComTarefas = data['data'];
             pacientesFiltrados = List.from(pacientesComTarefas);
@@ -92,14 +95,26 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
       } else {
         pacientesFiltrados = pacientesComTarefas.where((paciente) {
           final nome = paciente['nome']?.toString().toLowerCase() ?? '';
-          final motivacao = paciente['tarefas']?.any((tarefa) => 
-            tarefa['motivacao']?.toString().toLowerCase().contains(query.toLowerCase()) ?? false
-          ) ?? false;
-          final descricao = paciente['tarefas']?.any((tarefa) => 
-            tarefa['descricao']?.toString().toLowerCase().contains(query.toLowerCase()) ?? false
-          ) ?? false;
+          final motivacao =
+              paciente['tarefas']?.any(
+                (tarefa) =>
+                    tarefa['motivacao']?.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ??
+                    false,
+              ) ??
+              false;
+          final descricao =
+              paciente['tarefas']?.any(
+                (tarefa) =>
+                    tarefa['descricao']?.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ??
+                    false,
+              ) ??
+              false;
           final searchLower = query.toLowerCase();
-          
+
           return nome.contains(searchLower) || motivacao || descricao;
         }).toList();
       }
@@ -108,8 +123,8 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
 
   String _formatarData(String dataTarefa) {
     try {
-      if (dataTarefa == null || dataTarefa.isEmpty) return 'Data não informada';
-      
+      if (dataTarefa.isEmpty) return 'Data não informada';
+
       // Tenta parse como DateTime primeiro
       try {
         final dateTime = DateTime.parse(dataTarefa);
@@ -175,19 +190,13 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                     if (tarefa['descricao'] != null)
                       Text(
                         tarefa['descricao']!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     const SizedBox(height: 4),
                     if (tarefa['data_tarefa'] != null)
                       Text(
                         'Data: ${_formatarData(tarefa['data_tarefa'])}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                   ],
                 ),
@@ -228,7 +237,9 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                 prefixIcon: const Icon(Icons.search),
                 hintText: 'Buscar paciente, motivação ou descrição...',
                 contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 16.0),
+                  vertical: 16.0,
+                  horizontal: 16.0,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                   borderSide: BorderSide.none,
@@ -248,7 +259,7 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
               onChanged: _filtrarTarefas,
             ),
             const SizedBox(height: 20),
-            
+
             if (isLoading)
               const Expanded(
                 child: Center(
@@ -268,18 +279,11 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
+                      Icon(Icons.error_outline, size: 64, color: Colors.red),
                       SizedBox(height: 16),
                       Text(
                         errorMessage,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.red, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16),
@@ -307,10 +311,7 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                         _searchController.text.isEmpty
                             ? 'Nenhuma tarefa encontrada'
                             : 'Nenhuma tarefa encontrada para a busca',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -324,9 +325,11 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                   itemBuilder: (context, index) {
                     final paciente = pacientesFiltrados[index];
                     final tarefas = paciente['tarefas'] as List<dynamic>? ?? [];
-                    
-                    print('🎯 Renderizando paciente: ${paciente['nome']} com ${tarefas.length} tarefas');
-                    
+
+                    print(
+                      '🎯 Renderizando paciente: ${paciente['nome']} com ${tarefas.length} tarefas',
+                    );
+
                     return Card(
                       elevation: 2,
                       margin: const EdgeInsets.only(bottom: 15),
@@ -343,7 +346,11 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                               radius: 25,
                               backgroundColor: Colors.blue[100],
                               child: Text(
-                                paciente['nome']?.toString().substring(0, 1).toUpperCase() ?? '?',
+                                paciente['nome']
+                                        ?.toString()
+                                        .substring(0, 1)
+                                        .toUpperCase() ??
+                                    '?',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue,
@@ -351,7 +358,8 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                               ),
                             ),
                             title: Text(
-                              paciente['nome']?.toString() ?? 'Paciente não identificado',
+                              paciente['nome']?.toString() ??
+                                  'Paciente não identificado',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -363,7 +371,9 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                                 if (paciente['idade'] != null)
                                   Text('Idade: ${paciente['idade']} anos'),
                                 if (paciente['tipo_sanguineo'] != null)
-                                  Text('Tipo Sanguíneo: ${paciente['tipo_sanguineo']}'),
+                                  Text(
+                                    'Tipo Sanguíneo: ${paciente['tipo_sanguineo']}',
+                                  ),
                                 Text(
                                   '${tarefas.length} tarefa(s)',
                                   style: TextStyle(
@@ -374,16 +384,18 @@ class _TarefasFamiliarState extends State<TarefasFamiliar> {
                               ],
                             ),
                           ),
-                          
+
                           // Lista de tarefas do paciente
                           if (tarefas.isNotEmpty)
                             ...tarefas.asMap().entries.map((entry) {
                               final tarefaIndex = entry.key;
                               final tarefa = entry.value;
-                              
-                              print('📝 Renderizando tarefa: ${tarefa['motivacao']}');
+
+                              print(
+                                '📝 Renderizando tarefa: ${tarefa['motivacao']}',
+                              );
                               return _buildTarefaCard(tarefa, tarefaIndex);
-                            }).toList()
+                            })
                           else
                             const Padding(
                               padding: EdgeInsets.all(16.0),

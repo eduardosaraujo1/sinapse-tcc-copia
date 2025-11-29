@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../config.dart';
 import 'confirmar_agendamento_medicamento_screen.dart';
 
 class Patient {
@@ -10,7 +13,7 @@ class Patient {
   final String imagePath;
 
   Patient({
-    required this.id, 
+    required this.id,
     required this.nome,
     required this.idade,
     required this.imagePath,
@@ -32,10 +35,12 @@ class SelecionarPacienteMedicamento extends StatefulWidget {
   });
 
   @override
-  State<SelecionarPacienteMedicamento> createState() => _SelecionarPacienteMedicamentoState();
+  State<SelecionarPacienteMedicamento> createState() =>
+      _SelecionarPacienteMedicamentoState();
 }
 
-class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedicamento> {
+class _SelecionarPacienteMedicamentoState
+    extends State<SelecionarPacienteMedicamento> {
   List<Patient> _patients = [];
   bool _isLoading = true;
   String? _error;
@@ -44,7 +49,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
   void initState() {
     super.initState();
     _fetchPatients();
-    
+
     // Debug: verifique se os parâmetros estão chegando
     print('Data selecionada: ${widget.selectedDate}');
     print('Hora selecionada: ${widget.selectedTime}');
@@ -58,7 +63,8 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
     });
 
     // URL da API - ajuste conforme necessário
-    const apiUrl = 'http://localhost:8000/api/cuidador/SelecionarPacienteMedicamento';
+    const apiUrl =
+        '${Config.apiUrl}/api/cuidador/SelecionarPacienteMedicamento';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -68,10 +74,10 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = json.decode(response.body);
-        
+
         if (responseBody['success'] == true && responseBody['data'] is List) {
           final List<dynamic> data = responseBody['data'];
-          
+
           final fetchedPatients = data.map<Patient>((item) {
             return Patient(
               id: item['id']?.toString() ?? '0',
@@ -181,11 +187,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
   Widget _buildErrorWidget() {
     return Column(
       children: [
-        Icon(
-          Icons.error_outline,
-          color: Colors.red,
-          size: 64,
-        ),
+        Icon(Icons.error_outline, color: Colors.red, size: 64),
         const SizedBox(height: 16),
         Text(
           _error!,
@@ -198,12 +200,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF6ABAD5),
           ),
-          child: const Text('Tentar Novamente', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Tentar Novamente',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
   }
-  
+
   Widget _buildPatientList() {
     if (_patients.isEmpty) {
       return const Center(
@@ -211,12 +216,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           children: [
             Icon(Icons.people_outline, size: 64, color: Colors.grey),
             SizedBox(height: 16),
-            Text('Nenhum paciente encontrado.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            Text(
+              'Nenhum paciente encontrado.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ],
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -232,7 +240,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
       },
     );
   }
-  
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(80.0),
@@ -255,10 +263,7 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color(0xFF6ABAD5),
-              ],
+              colors: [Color(0xFFB3E5FC), Color(0xFF6ABAD5)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -298,7 +303,12 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
     );
   }
 
-  Widget _buildPatientCard(BuildContext context, String name, String age, String imagePath) {
+  Widget _buildPatientCard(
+    BuildContext context,
+    String name,
+    String age,
+    String imagePath,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
@@ -313,9 +323,16 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
         ),
         title: Text(
           name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
-        subtitle: Text('Idade: $age', style: const TextStyle(color: Colors.black54)),
+        subtitle: Text(
+          'Idade: $age',
+          style: const TextStyle(color: Colors.black54),
+        ),
         trailing: ElevatedButton(
           onPressed: () {
             Navigator.push(
@@ -333,10 +350,15 @@ class _SelecionarPacienteMedicamentoState extends State<SelecionarPacienteMedica
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF6ABAD5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Selecionar', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Selecionar',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );

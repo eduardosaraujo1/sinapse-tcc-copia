@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../config.dart';
 
 class Trocadesenha extends StatefulWidget {
   const Trocadesenha({super.key});
@@ -24,7 +27,8 @@ class _TrocadesenhaState extends State<Trocadesenha> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   // Função para alterar senha
   Future<void> _trocarSenha() async {
@@ -38,7 +42,7 @@ class _TrocadesenhaState extends State<Trocadesenha> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/api/cuidador/alterar-senha'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/alterar-senha'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
@@ -60,7 +64,9 @@ class _TrocadesenhaState extends State<Trocadesenha> {
           Future.delayed(const Duration(seconds: 2), () {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const HomeCuidadorScreen()),
+              MaterialPageRoute(
+                builder: (context) => const HomeCuidadorScreen(),
+              ),
               (route) => false,
             );
           });
@@ -104,16 +110,16 @@ class _TrocadesenhaState extends State<Trocadesenha> {
     if (value == null || value.isEmpty) {
       return 'Email é obrigatório';
     }
-    
+
     // Expressão regular para validar email
     final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
-    
+
     if (!emailRegex.hasMatch(value)) {
       return 'Digite um email válido';
     }
-    
+
     return null;
   }
 
@@ -139,10 +145,7 @@ class _TrocadesenhaState extends State<Trocadesenha> {
         ),
         title: const Text(
           'Alterar Senha',
-          style: TextStyle(
-            color: corPrincipal,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: corPrincipal, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -155,7 +158,7 @@ class _TrocadesenhaState extends State<Trocadesenha> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                
+
                 // Título
                 const Text(
                   "Alterar Senha",
@@ -165,27 +168,21 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     color: corPrincipal,
                   ),
                 ),
-                
+
                 const SizedBox(height: 10),
-                
+
                 // Subtítulo
                 const Text(
                   "Digite seu email e senha atual para criar uma nova senha",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blueGrey,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.blueGrey),
                 ),
-                
+
                 const SizedBox(height: 40),
 
                 // Campo Email
                 const Text(
                   'Email',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -202,19 +199,19 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                       borderSide: BorderSide.none,
                     ),
                     prefixIcon: const Icon(Icons.email, color: corPrincipal),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Campo Senha Antiga
                 const Text(
                   'Senha Atual',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -237,7 +234,9 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     prefixIcon: const Icon(Icons.lock, color: corPrincipal),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isOldPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isOldPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: corPrincipal,
                       ),
                       onPressed: () {
@@ -248,16 +247,13 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // Campo Nova Senha
                 const Text(
                   'Nova Senha',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -267,7 +263,7 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     if (value == null || value.isEmpty) {
                       return 'Nova senha é obrigatória';
                     }
-                 
+
                     // Verificar se a nova senha é diferente da atual
                     if (value == _oldPasswordController.text) {
                       return 'A nova senha deve ser diferente da senha atual';
@@ -282,10 +278,15 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: const Icon(Icons.lock_outline, color: corPrincipal),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline,
+                      color: corPrincipal,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isNewPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isNewPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: corPrincipal,
                       ),
                       onPressed: () {
@@ -296,16 +297,13 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Campo Confirmar Nova Senha
                 const Text(
                   'Confirmar Nova Senha',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -328,23 +326,29 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: const Icon(Icons.lock_reset, color: corPrincipal),
+                    prefixIcon: const Icon(
+                      Icons.lock_reset,
+                      color: corPrincipal,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isConfirmNewPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isConfirmNewPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: corPrincipal,
                       ),
                       onPressed: () {
                         setState(() {
-                          _isConfirmNewPasswordVisible = !_isConfirmNewPasswordVisible;
+                          _isConfirmNewPasswordVisible =
+                              !_isConfirmNewPasswordVisible;
                         });
                       },
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Dicas de senha
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -363,13 +367,17 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                         ),
                       ),
                       SizedBox(height: 8),
-                  
+
                       SizedBox(height: 4),
-                      
+
                       SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.check_circle, color: Colors.green, size: 16),
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                            size: 16,
+                          ),
                           SizedBox(width: 8),
                           Text('Diferente da senha anterior'),
                         ],
@@ -377,9 +385,9 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Botão Trocar Senha
                 SizedBox(
                   width: double.infinity,
@@ -404,14 +412,14 @@ class _TrocadesenhaState extends State<Trocadesenha> {
                         : const Text(
                             'Alterar Senha',
                             style: TextStyle(
-                              fontSize: 18, 
+                              fontSize: 18,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
               ],
             ),

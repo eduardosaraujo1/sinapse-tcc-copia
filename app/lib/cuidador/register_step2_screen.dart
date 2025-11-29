@@ -1,11 +1,7 @@
-import 'package:algumacoisa/cuidador/home_cuidador_screen.dart';
 import 'package:algumacoisa/cuidador/login_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:algumacoisa/cuidador/register_step3_screen.dart';
-import 'package:algumacoisa/familiar/acesso_familiar.dart';
-import 'package:algumacoisa/paciente/acesso_paciente.dart';
-import 'package:algumacoisa/familiar/Registraofamiliar.dart';
 
 
 class RegisterStep2Screen extends StatefulWidget {

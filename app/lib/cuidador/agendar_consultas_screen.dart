@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/selecionarpaciente_consulta.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class AgendarConsultaScreen extends StatefulWidget {
   const AgendarConsultaScreen({super.key});
@@ -14,21 +17,25 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedTime;
   bool _isLoading = false;
-  
-  final TextEditingController _especialidadeController = TextEditingController();
+
+  final TextEditingController _especialidadeController =
+      TextEditingController();
   final TextEditingController _medicoNomeController = TextEditingController();
 
   Future<void> _scheduleAppointment() async {
     if (_selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um horário')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um horário')));
       return;
     }
 
-    if (_especialidadeController.text.isEmpty || _medicoNomeController.text.isEmpty) {
+    if (_especialidadeController.text.isEmpty ||
+        _medicoNomeController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha a especialidade e nome do médico')),
+        const SnackBar(
+          content: Text('Preencha a especialidade e nome do médico'),
+        ),
       );
       return;
     }
@@ -57,9 +64,8 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
       print('Enviando dados da consulta: $agendamentoData');
 
       final response = await http.post(
-        Uri.parse('http://localhost:8000/api/cuidador/PacienteConsulta1'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/PacienteConsulta1'),
         headers: <String, String>{
-          
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(agendamentoData),
@@ -68,7 +74,7 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
       if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
         print('Consulta agendada com sucesso: ${responseData['agendamento']}');
-        
+
         // Navegar para seleção de paciente passando os dados da consulta
         Navigator.push(
           context,
@@ -84,18 +90,17 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
       } else {
         final errorData = json.decode(response.body);
         print('Erro na resposta: ${errorData['error']}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: ${errorData['error']}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: ${errorData['error']}')));
       }
-
     } catch (e) {
       print('Erro ao conectar ou enviar dados: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erro de conexão. Verifique sua rede.')),
       );
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -134,7 +139,7 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
               SizedBox(height: 16),
               _buildTextField('Nome do Médico', _medicoNomeController),
               SizedBox(height: 24),
-              
+
               _buildCalendar(month, year),
               SizedBox(height: 24),
               Text(
@@ -148,19 +153,25 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
               ),
               SizedBox(height: 16),
               _buildTimeGrid(),
-              SizedBox(height: 80), 
+              SizedBox(height: 80),
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: ElevatedButton(
-                  onPressed: (_selectedTime != null && 
-                            _especialidadeController.text.isNotEmpty && 
-                            _medicoNomeController.text.isNotEmpty && 
-                            !_isLoading) ? _scheduleAppointment : null,
+                  onPressed:
+                      (_selectedTime != null &&
+                          _especialidadeController.text.isNotEmpty &&
+                          _medicoNomeController.text.isNotEmpty &&
+                          !_isLoading)
+                      ? _scheduleAppointment
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: (_selectedTime != null && 
-                                    _especialidadeController.text.isNotEmpty && 
-                                    _medicoNomeController.text.isNotEmpty && 
-                                    !_isLoading) ? corPrincipal.withOpacity(0.1) : Colors.grey[200],
+                    backgroundColor:
+                        (_selectedTime != null &&
+                            _especialidadeController.text.isNotEmpty &&
+                            _medicoNomeController.text.isNotEmpty &&
+                            !_isLoading)
+                        ? corPrincipal.withOpacity(0.1)
+                        : Colors.grey[200],
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -171,16 +182,21 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(corPrincipal),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              corPrincipal,
+                            ),
                             strokeWidth: 3,
                           ),
                         )
                       : Text(
                           'Próximo',
                           style: TextStyle(
-                            color: (_selectedTime != null && 
-                                    _especialidadeController.text.isNotEmpty && 
-                                    _medicoNomeController.text.isNotEmpty) ? corPrincipal : Colors.grey[600],
+                            color:
+                                (_selectedTime != null &&
+                                    _especialidadeController.text.isNotEmpty &&
+                                    _medicoNomeController.text.isNotEmpty)
+                                ? corPrincipal
+                                : Colors.grey[600],
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -196,7 +212,7 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
 
   Widget _buildTextField(String label, TextEditingController controller) {
     const Color corPrincipal = Color(0xFF6ABAD5);
-    
+
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -213,7 +229,7 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
       ),
     );
   }
-  
+
   Widget _buildCalendar(int month, int year) {
     const Color corPrincipal = Color(0xFF6ABAD5);
     final daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -293,7 +309,8 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
             final isCurrentMonthDay = day.isNotEmpty;
             final dayInt = isCurrentMonthDay ? int.parse(day) : -1;
 
-            final isSelected = isCurrentMonthDay &&
+            final isSelected =
+                isCurrentMonthDay &&
                 dayInt == _selectedDate.day &&
                 month == _selectedDate.month &&
                 year == _selectedDate.year;
@@ -301,7 +318,9 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
             final DateTime currentDayDate = isCurrentMonthDay
                 ? DateTime(year, month, dayInt)
                 : DateTime.now().add(Duration(days: 9999));
-            final bool isPastDate = currentDayDate.isBefore(DateTime.now().subtract(Duration(days: 1)));
+            final bool isPastDate = currentDayDate.isBefore(
+              DateTime.now().subtract(Duration(days: 1)),
+            );
 
             return GestureDetector(
               onTap: isCurrentMonthDay && !isPastDate
@@ -315,7 +334,9 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isSelected ? corPrincipal.withOpacity(0.1) : Colors.transparent,
+                    color: isSelected
+                        ? corPrincipal.withOpacity(0.1)
+                        : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   padding: EdgeInsets.all(8),
@@ -325,9 +346,13 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
                       color: isSelected
                           ? corPrincipal
                           : (isPastDate
-                              ? Colors.grey.shade400
-                              : (isCurrentMonthDay ? Colors.black : Colors.transparent)),
-                      fontWeight: isSelected || isCurrentMonthDay ? FontWeight.bold : FontWeight.normal,
+                                ? Colors.grey.shade400
+                                : (isCurrentMonthDay
+                                      ? Colors.black
+                                      : Colors.transparent)),
+                      fontWeight: isSelected || isCurrentMonthDay
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -342,7 +367,14 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
   Widget _buildTimeGrid() {
     const Color corPrincipal = Color(0xFF6ABAD5);
     final times = [
-      '8:00', '9:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
+      '8:00',
+      '9:00',
+      '10:00',
+      '11:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
     ];
 
     return GridView.builder(
@@ -366,9 +398,13 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
             });
           },
           style: OutlinedButton.styleFrom(
-            backgroundColor: isSelected ? corPrincipal.withOpacity(0.1) : Colors.white,
+            backgroundColor: isSelected
+                ? corPrincipal.withOpacity(0.1)
+                : Colors.white,
             side: BorderSide(
-              color: isSelected ? Colors.transparent : corPrincipal.withOpacity(0.4),
+              color: isSelected
+                  ? Colors.transparent
+                  : corPrincipal.withOpacity(0.4),
               width: 1.5,
             ),
             shape: RoundedRectangleBorder(
@@ -388,8 +424,18 @@ class _AgendarConsultaScreenState extends State<AgendarConsultaScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      "Janeiro",
+      "Fevereiro",
+      "Março",
+      "Abril",
+      "Maio",
+      "Junho",
+      "Julho",
+      "Agosto",
+      "Setembro",
+      "Outubro",
+      "Novembro",
+      "Dezembro",
     ];
     return months[month - 1];
   }

@@ -1,11 +1,13 @@
-import 'package:algumacoisa/cuidador/login_screen.dart';
-import 'package:algumacoisa/cuidador/register_step4_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:algumacoisa/cuidador/login_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../config.dart';
+
 // --- CONFIGURAÇÃO DA API ---
-const String CuidadorCadastroApiUrl = 'http://localhost:8000/api/cuidador/cadastro';
+const String CuidadorCadastroApiUrl = '${Config.apiUrl}/api/cuidador/cadastro';
 
 class RegisterStep3Screen extends StatefulWidget {
   const RegisterStep3Screen({super.key});
@@ -21,26 +23,36 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  
+
   // Variáveis para controle de visibilidade da senha
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  
+
   // Variáveis para Dropdown e Radio Button
   String? _selectedGender;
   int? _selectedDay;
   String? _selectedMonth;
   int? _selectedYear;
-  
+
   // Mapa de meses para números (para facilitar a formatação da data)
   final Map<String, String> _monthMap = {
-    "Janeiro": "01", "Fevereiro": "02", "Março": "03", "Abril": "04", 
-    "Maio": "05", "Junho": "06", "Julho": "07", "Agosto": "08", 
-    "Setembro": "09", "Outubro": "10", "Novembro": "11", "Dezembro": "12"
+    "Janeiro": "01",
+    "Fevereiro": "02",
+    "Março": "03",
+    "Abril": "04",
+    "Maio": "05",
+    "Junho": "06",
+    "Julho": "07",
+    "Agosto": "08",
+    "Setembro": "09",
+    "Outubro": "10",
+    "Novembro": "11",
+    "Dezembro": "12",
   };
 
   @override
@@ -57,20 +69,25 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
   // --- FUNÇÃO DE SUBMISSÃO DA API ---
   Future<void> _submitRegistration() async {
     if (!_formKey.currentState!.validate()) {
-      return; 
+      return;
     }
 
     // 1. Validação de Senha e Data
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('As senhas não coincidem.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('As senhas não coincidem.')));
       return;
     }
-    
-    if (_selectedDay == null || _selectedMonth == null || _selectedYear == null || _selectedGender == null) {
+
+    if (_selectedDay == null ||
+        _selectedMonth == null ||
+        _selectedYear == null ||
+        _selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha a data de nascimento e o gênero.')),
+        const SnackBar(
+          content: Text('Por favor, preencha a data de nascimento e o gênero.'),
+        ),
       );
       return;
     }
@@ -112,15 +129,20 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
           );
         }
       } else {
-         final errorBody = jsonDecode(response.body);
-         final errorMessage = errorBody['error'] ?? 'Erro desconhecido no cadastro.';
-         throw Exception(errorMessage);
+        final errorBody = jsonDecode(response.body);
+        final errorMessage =
+            errorBody['error'] ?? 'Erro desconhecido no cadastro.';
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('Erro ao enviar dados de cadastro: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Falha no cadastro: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(
+            content: Text(
+              'Falha no cadastro: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
+          ),
         );
       }
     } finally {
@@ -129,19 +151,28 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
       }
     }
   }
-  
+
   // Método auxiliar para campos de texto com suporte para toggle de senha
-  Widget _buildTextField(String hint, TextEditingController controller, String? Function(String?) validator,
-      {TextInputType type = TextInputType.text, bool isPassword = false, VoidCallback? onToggleVisibility, bool? obscureText}) {
-    
+  Widget _buildTextField(
+    String hint,
+    TextEditingController controller,
+    String? Function(String?) validator, {
+    TextInputType type = TextInputType.text,
+    bool isPassword = false,
+    VoidCallback? onToggleVisibility,
+    bool? obscureText,
+  }) {
     final OutlineInputBorder borderStyle = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10.0),
       borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
     );
-    
+
     final OutlineInputBorder focusStyle = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10.0),
-      borderSide: const BorderSide(color: Color.fromARGB(255, 106, 186, 213), width: 2),
+      borderSide: const BorderSide(
+        color: Color.fromARGB(255, 106, 186, 213),
+        width: 2,
+      ),
     );
 
     return TextFormField(
@@ -151,16 +182,21 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16.0,
+          horizontal: 16.0,
+        ),
         border: borderStyle,
         enabledBorder: borderStyle,
         focusedBorder: focusStyle,
         filled: true,
         fillColor: Colors.white,
-        suffixIcon: isPassword 
+        suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  (obscureText ?? true) ? Icons.visibility_off : Icons.visibility,
+                  (obscureText ?? true)
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                   color: Colors.black54,
                 ),
                 onPressed: onToggleVisibility,
@@ -174,7 +210,10 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
   InputDecoration _dropDownDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 12.0,
+        horizontal: 12.0,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
         borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
@@ -185,7 +224,10 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 106, 186, 213), width: 2),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 106, 186, 213),
+          width: 2,
+        ),
       ),
       filled: true,
       fillColor: Colors.white,
@@ -225,66 +267,93 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
               const SizedBox(height: 40),
 
               // Nome Completo
-              const Text("Nome Completo *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Nome Completo *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu nome", _nameController, (value) => value!.isEmpty ? 'O nome é obrigatório.' : null),
+              _buildTextField(
+                "Digite seu nome",
+                _nameController,
+                (value) => value!.isEmpty ? 'O nome é obrigatório.' : null,
+              ),
               const SizedBox(height: 20),
 
               // Email
-              const Text("Email *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Email *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu email", _emailController, (value) {
-                if (value!.isEmpty || !value.contains('@')) {
-                  return 'Insira um email válido.';
-                }
-                return null;
-              }, type: TextInputType.emailAddress),
+              _buildTextField(
+                "Digite seu email",
+                _emailController,
+                (value) {
+                  if (value!.isEmpty || !value.contains('@')) {
+                    return 'Insira um email válido.';
+                  }
+                  return null;
+                },
+                type: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 20),
 
               // Data de Nascimento
-              const Text("Data de Nascimento *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Data de Nascimento *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       decoration: _dropDownDecoration("Dia"),
-                      value: _selectedDay,
+                      initialValue: _selectedDay,
                       items: List.generate(31, (i) => i + 1)
-                          .map((day) => DropdownMenuItem(
-                                value: day,
-                                child: Text(day.toString()),
-                              ))
+                          .map(
+                            (day) => DropdownMenuItem(
+                              value: day,
+                              child: Text(day.toString()),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedDay = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedDay = value),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: _dropDownDecoration("Mês"),
-                      value: _selectedMonth,
+                      initialValue: _selectedMonth,
                       items: _monthMap.keys
-                          .map((month) => DropdownMenuItem(
-                                value: month,
-                                child: Text(month),
-                              ))
+                          .map(
+                            (month) => DropdownMenuItem(
+                              value: month,
+                              child: Text(month),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedMonth = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedMonth = value),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       decoration: _dropDownDecoration("Ano"),
-                      value: _selectedYear,
+                      initialValue: _selectedYear,
                       items: List.generate(100, (i) => DateTime.now().year - i)
-                          .map((year) => DropdownMenuItem(
-                                value: year,
-                                child: Text(year.toString()),
-                              ))
+                          .map(
+                            (year) => DropdownMenuItem(
+                              value: year,
+                              child: Text(year.toString()),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setState(() => _selectedYear = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedYear = value),
                     ),
                   ),
                 ],
@@ -292,27 +361,33 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
               const SizedBox(height: 20),
 
               // Gênero
-              const Text("Gênero *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Gênero *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               Row(
                 children: [
                   Radio<String>(
                     value: "F",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Feminino"),
                   Radio<String>(
                     value: "M",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Masculino"),
                   Radio<String>(
                     value: "O",
                     groupValue: _selectedGender,
-                    onChanged: (value) => setState(() => _selectedGender = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedGender = value),
                     activeColor: const Color.fromARGB(255, 106, 186, 213),
                   ),
                   const Text("Outro"),
@@ -322,26 +397,46 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
               const SizedBox(height: 20),
 
               // Telefone
-              const Text("Telefone", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Telefone",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu telefone", _phoneController, (value) => null, type: TextInputType.phone),
+              _buildTextField(
+                "Digite seu telefone",
+                _phoneController,
+                (value) => null,
+                type: TextInputType.phone,
+              ),
 
               const SizedBox(height: 20),
 
               // Endereço
-              const Text("Endereço", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Endereço",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
-              _buildTextField("Digite seu endereço", _addressController, (value) => null),
+              _buildTextField(
+                "Digite seu endereço",
+                _addressController,
+                (value) => null,
+              ),
 
               const SizedBox(height: 20),
 
               // Senha
-              const Text("Senha *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Senha *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
               _buildTextField(
-                "Digite sua senha", 
-                _passwordController, 
-                (value) => value!.length < 6 ? 'A senha deve ter pelo menos 6 caracteres.' : null, 
+                "Digite sua senha",
+                _passwordController,
+                (value) => value!.length < 6
+                    ? 'A senha deve ter pelo menos 6 caracteres.'
+                    : null,
                 isPassword: true,
                 obscureText: _obscurePassword,
                 onToggleVisibility: () {
@@ -354,12 +449,15 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
               const SizedBox(height: 20),
 
               // Confirme sua senha
-              const Text("Confirme sua senha *", style: TextStyle(fontSize: 16, color: Colors.black54)),
+              const Text(
+                "Confirme sua senha *",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
               const SizedBox(height: 8),
               _buildTextField(
-                "Repita sua senha", 
-                _confirmPasswordController, 
-                (value) => value!.isEmpty ? 'Confirme sua senha.' : null, 
+                "Repita sua senha",
+                _confirmPasswordController,
+                (value) => value!.isEmpty ? 'Confirme sua senha.' : null,
                 isPassword: true,
                 obscureText: _obscureConfirmPassword,
                 onToggleVisibility: () {
@@ -387,12 +485,12 @@ class _RegisterStep3Screen extends State<RegisterStep3Screen> {
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
-                    : const Text(
-                        "Cadastrar",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                    : const Text("Cadastrar", style: TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 40),
             ],

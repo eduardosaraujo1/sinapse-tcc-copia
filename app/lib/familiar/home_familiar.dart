@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:algumacoisa/familiar/agenda_familiar.dart';
 import 'package:algumacoisa/familiar/consultas_familiar.dart';
 import 'package:algumacoisa/familiar/conversas_familiar.dart';
@@ -8,8 +9,10 @@ import 'package:algumacoisa/familiar/meu_perfil_screen.dart';
 import 'package:algumacoisa/familiar/notificacoes_screen.dart';
 import 'package:algumacoisa/familiar/sentimentos_familiar.dart';
 import 'package:algumacoisa/familiar/tarefas_familiar.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class HomeFamiliar extends StatefulWidget {
   const HomeFamiliar({super.key});
@@ -31,9 +34,9 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
 
   Future<void> _carregarPerfil() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://localhost:8000/api/familiar/perfil'),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(Uri.parse('${Config.apiUrl}/api/familiar/perfil'))
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         setState(() {
@@ -48,7 +51,8 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
       }
     } catch (error) {
       setState(() {
-        _errorMessage = 'Erro de conexão: $error\n\nVerifique:\n1. Se o servidor está rodando\n2. Se a URL está correta\n3. Sua conexão com a internet';
+        _errorMessage =
+            'Erro de conexão: $error\n\nVerifique:\n1. Se o servidor está rodando\n2. Se a URL está correta\n3. Sua conexão com a internet';
         _isLoading = false;
       });
     }
@@ -56,7 +60,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
 
   // Função para obter a letra inicial do nome
   String _getInicial(String nome) {
-    if (nome == null || nome.isEmpty) return '?';
+    if (nome.isEmpty) return '?';
     return nome[0].toUpperCase();
   }
 
@@ -72,9 +76,9 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
       Colors.indigo,
       Colors.amber,
     ];
-    
+
     if (letra.isEmpty || letra == '?') return Colors.grey;
-    
+
     final index = letra.codeUnitAt(0) % colors.length;
     return colors[index];
   }
@@ -93,27 +97,27 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
     final avatarColor = _getAvatarColor(inicial);
 
     return Scaffold(
-  appBar: AppBar(
-  toolbarHeight: 100,
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  automaticallyImplyLeading: false, // ← ADICIONE ESTA LINHA
-  flexibleSpace: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          const Color.fromARGB(255, 106, 186, 213),
-          const Color.fromARGB(255, 106, 186, 213),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+      appBar: AppBar(
+        toolbarHeight: 100,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false, // ← ADICIONE ESTA LINHA
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color.fromARGB(255, 106, 186, 213),
+                const Color.fromARGB(255, 106, 186, 213),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 InkWell(
                   onTap: () => _navegarParaPerfil(context),
                   child: Row(
@@ -180,11 +184,16 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.white),
+                  icon: const Icon(
+                    Icons.notifications_none,
+                    color: Colors.white,
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => NotificacoesFamiliar()),
+                      MaterialPageRoute(
+                        builder: (context) => NotificacoesFamiliar(),
+                      ),
                     );
                   },
                 ),
@@ -215,7 +224,9 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MedicamentosFamiliar()),
+                  MaterialPageRoute(
+                    builder: (context) => MedicamentosFamiliar(),
+                  ),
                 );
               },
             ),
@@ -248,11 +259,13 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SentimentosFamiliar()),
+                  MaterialPageRoute(
+                    builder: (context) => SentimentosFamiliar(),
+                  ),
                 );
               },
             ),
-            
+
             // Botão para recarregar em caso de erro
             if (_errorMessage.isNotEmpty)
               Padding(
@@ -272,7 +285,12 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
                         ElevatedButton(
                           onPressed: _carregarPerfil,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 106, 186, 213),
+                            backgroundColor: const Color.fromARGB(
+                              255,
+                              106,
+                              186,
+                              213,
+                            ),
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('Tentar Novamente'),
@@ -290,13 +308,19 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: const Icon(Icons.home, color: Color.fromARGB(255, 106, 186, 213)),
+              icon: const Icon(
+                Icons.home,
+                color: Color.fromARGB(255, 106, 186, 213),
+              ),
               onPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
             ),
             IconButton(
-              icon: const Icon(Icons.message_outlined, color: Color.fromARGB(255, 106, 186, 213)),
+              icon: const Icon(
+                Icons.message_outlined,
+                color: Color.fromARGB(255, 106, 186, 213),
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -305,7 +329,10 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.calendar_today_outlined, color: Color.fromARGB(255, 106, 186, 213)),
+              icon: const Icon(
+                Icons.calendar_today_outlined,
+                color: Color.fromARGB(255, 106, 186, 213),
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -328,9 +355,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -338,7 +363,11 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(icon, size: 40, color: const Color.fromARGB(255, 106, 186, 213)),
+              Icon(
+                icon,
+                size: 40,
+                color: const Color.fromARGB(255, 106, 186, 213),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -346,7 +375,10 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(subtitle),

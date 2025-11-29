@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 // -----------------------------------------------------------------------------
 // 1. Definição da tela de Confirmação (ConfirmationNotificationScreen)
@@ -26,12 +29,27 @@ class ConfirmationNotificationScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const dayNames = [
-      'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 
-      'Sexta-feira', 'Sábado', 'Domingo'
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
+      'Domingo',
     ];
     const monthNames = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     return '${dayNames[date.weekday - 1]}, ${date.day} de ${monthNames[date.month - 1]}';
   }
@@ -68,20 +86,26 @@ class ConfirmationNotificationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'A consulta de "$tipoConsulta" para ${patientName} foi agendada com sucesso.',
+                'A consulta de "$tipoConsulta" para $patientName foi agendada com sucesso.',
                 style: const TextStyle(fontSize: 18, color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               Card(
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildInfoRow(Icons.calendar_today, 'Data', _formatDate(date)),
+                      _buildInfoRow(
+                        Icons.calendar_today,
+                        'Data',
+                        _formatDate(date),
+                      ),
                       const SizedBox(height: 12),
                       _buildInfoRow(Icons.access_time, 'Horário', time),
                       const SizedBox(height: 12),
@@ -94,17 +118,23 @@ class ConfirmationNotificationScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Aqui você pode navegar para a tela principal ou lista de consultas
-                  Navigator.of(context).popUntil((route) => route.isFirst); 
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6ABAD5),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text(
                   'Voltar para a tela inicial',
-                  style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -122,8 +152,14 @@ class ConfirmationNotificationScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-            Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
       ],
@@ -150,10 +186,12 @@ class ConfirmarAgendamentoConsultaScreen extends StatefulWidget {
   });
 
   @override
-  State<ConfirmarAgendamentoConsultaScreen> createState() => _ConfirmarAgendamentoConsultaScreenState();
+  State<ConfirmarAgendamentoConsultaScreen> createState() =>
+      _ConfirmarAgendamentoConsultaScreenState();
 }
 
-class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendamentoConsultaScreen> {
+class _ConfirmarAgendamentoConsultaScreenState
+    extends State<ConfirmarAgendamentoConsultaScreen> {
   late TextEditingController _tipoConsultaController;
   late TextEditingController _observacoesController;
   bool _isLoading = false;
@@ -174,17 +212,32 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
 
   String _getDayName(int weekday) {
     const dayNames = [
-      'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 
-      'Sexta-feira', 'Sábado', 'Domingo'
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
+      'Domingo',
     ];
     // weekday 1=Monday, 7=Sunday. Array is 0-indexed.
-    return dayNames[weekday - 1]; 
+    return dayNames[weekday - 1];
   }
 
   String _getMonthName(int month) {
     const monthNames = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     // month 1=January, 12=December. Array is 0-indexed.
     return monthNames[month - 1];
@@ -204,20 +257,23 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
 
     try {
       // Mocked endpoint - Substitua com a sua URL real da API.
-      const apiUrl = 'http://localhost:8000/api/consultas'; 
+      const apiUrl = '${Config.apiUrl}/api/consultas';
 
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          // O ideal é usar o ID do paciente, não o nome, mas usaremos o nome 
+          // O ideal é usar o ID do paciente, não o nome, mas usaremos o nome
           // conforme a estrutura atual do widget.
-          'patient_name': widget.patientName, 
+          'patient_name': widget.patientName,
           'tipo_consulta': _tipoConsultaController.text,
           'observacoes': _observacoesController.text,
-          'date': widget.date.toIso8601String().substring(0, 10), // Apenas a data
+          'date': widget.date.toIso8601String().substring(
+            0,
+            10,
+          ), // Apenas a data
           'time': widget.time,
-          'cuidador_id': 1 // Valor fixo para simulação
+          'cuidador_id': 1, // Valor fixo para simulação
         }),
       );
 
@@ -237,12 +293,13 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
         );
       } else {
         // Falha: Exibe erro do servidor
-        String errorMessage = 'Erro ao agendar consulta (Status: ${response.statusCode})';
+        String errorMessage =
+            'Erro ao agendar consulta (Status: ${response.statusCode})';
         try {
-            final errorData = json.decode(response.body);
-            errorMessage = errorData['error'] ?? errorMessage;
+          final errorData = json.decode(response.body);
+          errorMessage = errorData['error'] ?? errorMessage;
         } catch (_) {
-            // Se o body não for JSON, usa a mensagem padrão
+          // Se o body não for JSON, usa a mensagem padrão
         }
         throw Exception(errorMessage);
       }
@@ -260,7 +317,8 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = '${_getDayName(widget.date.weekday)}, ${widget.date.day} de ${_getMonthName(widget.date.month)}';
+    final formattedDate =
+        '${_getDayName(widget.date.weekday)}, ${widget.date.day} de ${_getMonthName(widget.date.month)}';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -305,9 +363,13 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
                 onPressed: () {
                   // TODO: Implementar a navegação para a tela de seleção de data/horário
                   // Por enquanto, apenas exibe um SnackBar
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(content: Text('Funcionalidade de Alterar Data/Horário ainda não implementada.')),
-                   );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Funcionalidade de Alterar Data/Horário ainda não implementada.',
+                      ),
+                    ),
+                  );
                 },
                 child: const Text(
                   'Alterar data ou horário',
@@ -320,10 +382,17 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
               const SizedBox(height: 48),
               _buildEditableField('Tipo de Consulta', _tipoConsultaController),
               const SizedBox(height: 24),
-              _buildObservacoesField('Observações (opcional)', _observacoesController),
+              _buildObservacoesField(
+                'Observações (opcional)',
+                _observacoesController,
+              ),
               const SizedBox(height: 64),
               _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF6ABAD5)))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF6ABAD5),
+                      ),
+                    )
                   : ElevatedButton(
                       onPressed: _saveAppointmentToDatabase,
                       style: ElevatedButton.styleFrom(
@@ -373,10 +442,7 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFB3E5FC),
-                Color(0xFF6ABAD5),
-              ],
+              colors: [Color(0xFFB3E5FC), Color(0xFF6ABAD5)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -412,9 +478,7 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
           ),
           child: TextField(
             controller: controller,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
+            decoration: const InputDecoration(border: InputBorder.none),
             style: const TextStyle(fontSize: 16, color: Colors.black87),
           ),
         ),
@@ -422,7 +486,10 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
     );
   }
 
-  Widget _buildObservacoesField(String label, TextEditingController controller) {
+  Widget _buildObservacoesField(
+    String label,
+    TextEditingController controller,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -445,9 +512,7 @@ class _ConfirmarAgendamentoConsultaScreenState extends State<ConfirmarAgendament
           child: TextField(
             controller: controller,
             maxLines: 3,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-            ),
+            decoration: const InputDecoration(border: InputBorder.none),
             style: const TextStyle(fontSize: 16, color: Colors.black87),
           ),
         ),

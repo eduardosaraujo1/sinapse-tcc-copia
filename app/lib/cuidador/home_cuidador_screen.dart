@@ -1,25 +1,26 @@
-import 'package:flutter/material.dart';
 import 'dart:convert'; // Para decodificar a resposta JSON
-import 'package:http/http.dart' as http; // Biblioteca HTTP
+
 import 'package:algumacoisa/cuidador/agenda_cuidador.dart';
 import 'package:algumacoisa/cuidador/selecionar_paciente_screen.dart';
-import 'consultas_screen.dart';
-import 'medicamentos_screen.dart';
-import 'emergencias_screen.dart';
-import 'tarefas_screen.dart';
-import 'sentimentos_screen.dart';
-import 'pacientes_screen.dart';
-import 'meu_perfil_screen.dart';
-import 'conversas_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // Biblioteca HTTP
+
+import '../config.dart';
 import 'agendar_consultas_screen.dart';
 import 'agendar_medicamento_screen.dart';
-import 'agendar_tarefa_screen.dart' hide AgendarConsultasScreen, PacientesScreen, ConversasScreen, MeuPerfilScreen;
-import 'notifications_screen.dart';
+import 'agendar_tarefa_screen.dart';
+import 'consultas_screen.dart';
+import 'conversas_screen.dart';
+import 'emergencias_screen.dart';
+import 'medicamentos_screen.dart';
 import 'meu_perfil_screen.dart';
+import 'notifications_screen.dart';
+import 'pacientes_screen.dart';
+import 'sentimentos_screen.dart';
+import 'tarefas_screen.dart';
 
 // Constante de cor primária e espaçamento para FABs
 const Color _primaryColor = Color.fromARGB(255, 106, 186, 213);
-const double _fabSpacing = 75.0; 
 
 // --- Modelo de Dados ---
 class CuidadorPerfil {
@@ -30,7 +31,7 @@ class CuidadorPerfil {
   factory CuidadorPerfil.fromJson(Map<String, dynamic> json) {
     return CuidadorPerfil(
       // Assume que a API retorna 'nome'. Se for nulo, usa um fallback.
-      nome: json['nome'] ?? 'Nome Desconhecido', 
+      nome: json['nome'] ?? 'Nome Desconhecido',
     );
   }
 }
@@ -39,17 +40,16 @@ class HomeCuidadorScreen extends StatefulWidget {
   const HomeCuidadorScreen({super.key});
 
   @override
-  _HomeCuidadorScreenState createState() => _HomeCuidadorScreenState();
+  State<HomeCuidadorScreen> createState() => _HomeCuidadorScreenState();
 }
 
 class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
   bool _showOptions = false;
   String _caregiverName = 'Cuidador(a)'; // Nome padrão
   bool _isLoading = true;
-  bool _hasError = false;
 
   // URL da API local fornecida
-  final String apiUrl = 'http://localhost:8000/api/cuidador/perfil';
+  final String apiUrl = '${Config.apiUrl}/api/cuidador/perfil';
 
   @override
   void initState() {
@@ -60,34 +60,36 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
   // --- Função para buscar o perfil do cuidador na API ---
   Future<void> _fetchCaregiverProfile() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(Uri.parse(apiUrl))
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         final profile = CuidadorPerfil.fromJson(jsonResponse);
-        
+
         // Pega apenas o primeiro nome para uma saudação concisa
-        final firstName = profile.nome.split(' ').first; 
+        final firstName = profile.nome.split(' ').first;
         setState(() {
           _caregiverName = firstName;
           _isLoading = false;
         });
       } else {
         // Trata erro de status HTTP (ex: 404, 500)
-        _handleFetchError('Falha ao carregar perfil: Status ${response.statusCode}');
+        _handleFetchError(
+          'Falha ao carregar perfil: Status ${response.statusCode}',
+        );
       }
     } catch (e) {
-  
       _handleFetchError('Erro de conexão ou timeout: $e');
     }
   }
 
   void _handleFetchError(String message) {
-     if (mounted) {
+    if (mounted) {
       setState(() {
         _caregiverName = 'Usuário'; // Fallback amigável
         _isLoading = false;
-        _hasError = true;
       });
       debugPrint(message);
     }
@@ -121,29 +123,31 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
     }
 
     return Scaffold(
-    appBar: AppBar(
-  toolbarHeight: 100,
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  automaticallyImplyLeading: false, // ← ADICIONE ESTA LINHA
-  flexibleSpace: Container(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [_primaryColor, _primaryColor],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+      appBar: AppBar(
+        toolbarHeight: 100,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false, // ← ADICIONE ESTA LINHA
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [_primaryColor, _primaryColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MeuPerfilScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => MeuPerfilScreen(),
+                      ),
                     );
                   },
                   child: Row(
@@ -175,11 +179,16 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.white),
+                  icon: const Icon(
+                    Icons.notifications_none,
+                    color: Colors.white,
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => NotificationsScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => NotificationsScreen(),
+                      ),
                     );
                   },
                 ),
@@ -202,7 +211,12 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   title: 'Consultas Hoje',
                   subtitle: 'Clique para vizualizar',
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ConsultasScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ConsultasScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildInfoCard(
@@ -211,7 +225,12 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   title: 'Medicamentos a administrar',
                   subtitle: 'Clique para vizualizar',
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MedicamentosScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MedicamentosScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildInfoCard(
@@ -220,7 +239,12 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   title: 'Emergências recentes',
                   subtitle: 'Clique para vizualizar',
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => EmergenciasScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EmergenciasScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildInfoCard(
@@ -229,7 +253,10 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   title: 'Tarefas Pendentes',
                   subtitle: 'Clique para vizualizar',
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => TarefasScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => TarefasScreen()),
+                    );
                   },
                 ),
                 _buildInfoCard(
@@ -238,7 +265,12 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   title: 'Sentimentos Paciente',
                   subtitle: 'Clique para vizualizar',
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => SentimentosScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SentimentosScreen(),
+                      ),
+                    );
                   },
                 ),
               ],
@@ -246,7 +278,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
           ),
 
           // --- Menu Flutuante de Opções de Agendamento ---
-         Positioned(
+          Positioned(
             bottom: 80,
             right: 16,
             child: Column(
@@ -260,7 +292,9 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     _toggleOptions();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AgendarMedicamentoScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => AgendarMedicamentoScreen(),
+                      ),
                     );
                   },
                 ),
@@ -272,7 +306,9 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     _toggleOptions();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AgendarTarefaScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => AgendarTarefaScreen(),
+                      ),
                     );
                   },
                 ),
@@ -284,7 +320,9 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     _toggleOptions();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AgendarConsultaScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => AgendarConsultaScreen(),
+                      ),
                     );
                   },
                 ),
@@ -296,7 +334,9 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     _toggleOptions();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SelecionarPacienteScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => SelecionarPacienteScreen(),
+                      ),
                     );
                   },
                 ),
@@ -317,13 +357,19 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.home, color: const Color.fromARGB(255, 106, 186, 213)),
+              icon: Icon(
+                Icons.home,
+                color: const Color.fromARGB(255, 106, 186, 213),
+              ),
               onPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
             ),
             IconButton(
-              icon: Icon(Icons.message_outlined, color: const Color.fromARGB(255, 106, 186, 213)),
+              icon: Icon(
+                Icons.message_outlined,
+                color: const Color.fromARGB(255, 106, 186, 213),
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -366,9 +412,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
     return Card(
       elevation: 4,
       margin: EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -376,7 +420,11 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(icon, size: 40, color: const Color.fromARGB(255, 106, 186, 213)),
+              Icon(
+                icon,
+                size: 40,
+                color: const Color.fromARGB(255, 106, 186, 213),
+              ),
               SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -384,7 +432,10 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     SizedBox(height: 4),
                     Text(subtitle),

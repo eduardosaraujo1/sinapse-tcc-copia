@@ -1,13 +1,17 @@
+import 'dart:convert';
+
 import 'package:algumacoisa/cuidador/registros_diarios_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import '../config.dart';
 
 class SelecionarPacienteScreen extends StatefulWidget {
   const SelecionarPacienteScreen({super.key});
 
   @override
-  State<SelecionarPacienteScreen> createState() => _SelecionarPacienteScreenState();
+  State<SelecionarPacienteScreen> createState() =>
+      _SelecionarPacienteScreenState();
 }
 
 class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
@@ -33,12 +37,12 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
   Future<void> _carregarPacientes() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/api/cuidador/ExibirPacientes'),
+        Uri.parse('${Config.apiUrl}/api/cuidador/ExibirPacientes'),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        
+
         if (data['success'] == true) {
           setState(() {
             pacientes = (data['data'] as List)
@@ -69,7 +73,7 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
 
   void _filtrarPacientes() {
     final query = _searchController.text.toLowerCase();
-    
+
     if (query.isEmpty) {
       setState(() {
         pacientesFiltrados = List.from(pacientes);
@@ -77,8 +81,7 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
     } else {
       setState(() {
         pacientesFiltrados = pacientes
-            .where((paciente) => 
-                paciente.nome.toLowerCase().contains(query))
+            .where((paciente) => paciente.nome.toLowerCase().contains(query))
             .toList();
       });
     }
@@ -96,7 +99,10 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Registros Diarios', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'Registros Diarios',
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -136,9 +142,7 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
 
   Widget _buildPatientList() {
     if (isLoading) {
-      return const Expanded(
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
     }
 
     if (errorMessage.isNotEmpty) {
@@ -161,9 +165,7 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
 
     if (pacientesFiltrados.isEmpty) {
       return const Expanded(
-        child: Center(
-          child: Text('Nenhum paciente encontrado'),
-        ),
+        child: Center(child: Text('Nenhum paciente encontrado')),
       );
     }
 
@@ -181,9 +183,7 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
   Widget _buildPatientCard(BuildContext context, Paciente paciente) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -205,8 +205,10 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
                       fontSize: 18,
                     ),
                   ),
-                  Text(paciente.idade ?? 'Idade não informada', 
-                      style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    paciente.idade ?? 'Idade não informada',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
@@ -215,7 +217,8 @@ class _SelecionarPacienteScreenState extends State<SelecionarPacienteScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RegistrosDiariosScreen(paciente: paciente),
+                    builder: (context) =>
+                        RegistrosDiariosScreen(paciente: paciente),
                   ),
                 );
               },
@@ -267,7 +270,9 @@ class Paciente {
       peso: json['peso']?.toString() ?? 'Peso não informado',
       tipoSanguineo: json['tipo_sanguineo']?.toString() ?? 'Não informado',
       comorbidade: json['comorbidade']?.toString() ?? 'Nenhuma',
-      cuidadorId: json['cuidador_id'] != null ? int.tryParse(json['cuidador_id'].toString()) : null,
+      cuidadorId: json['cuidador_id'] != null
+          ? int.tryParse(json['cuidador_id'].toString())
+          : null,
       email: json['email']?.toString(),
       dataRegistro: json['data_registro']?.toString(),
       imagePath: json['imagePath']?.toString(),
