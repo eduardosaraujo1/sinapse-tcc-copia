@@ -251,7 +251,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
             _buildInfoCard(
               icon: Icons.access_time,
               title: 'Consultas Hoje',
-              subtitle: 'clique para vizualizar',
+              subtitle: 'clique para visualizar',
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ConsultasFamiliar()),
@@ -260,7 +260,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
             _buildInfoCard(
               icon: Icons.medical_services_outlined,
               title: 'Medicamentos a administrar',
-              subtitle: 'clique para vizualizar',
+              subtitle: 'clique para visualizar',
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => MedicamentosFamiliar()),
@@ -278,7 +278,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
             _buildInfoCard(
               icon: Icons.task_alt,
               title: 'Tarefas Pendentes',
-              subtitle: 'clique para vizualizar',
+              subtitle: 'clique para visualizar',
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => TarefasFamiliar()),
@@ -287,7 +287,7 @@ class _HomeFamiliarState extends State<HomeFamiliar> {
             _buildInfoCard(
               icon: Icons.sick_outlined,
               title: 'Sentimentos Paciente',
-              subtitle: 'clique para vizualizar',
+              subtitle: 'clique para visualizar',
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SentimentosFamiliar()),

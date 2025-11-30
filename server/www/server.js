@@ -9,9 +9,9 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const dbConfig = {
-    host: process.env.MYSQL_HOST || "nidus-mysql",
-    user: process.env.MYSQL_USER || "application",
-    password: process.env.MYSQL_PASSWORD || "secure_password",
+    host: process.env.MYSQL_HOST || "localhost",
+    user: process.env.MYSQL_USER || "root",
+    password: process.env.MYSQL_PASSWORD || "root",
     database: process.env.MYSQL_DATABASE || "nidus_db",
     port: parseInt(process.env.MYSQL_PORT) || 3306,
 };

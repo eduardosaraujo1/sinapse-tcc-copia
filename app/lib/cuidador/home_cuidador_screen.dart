@@ -213,7 +213,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     context: context,
                     icon: Icons.access_time,
                     title: 'Consultas Hoje',
-                    subtitle: 'Clique para vizualizar',
+                    subtitle: 'Clique para visualizar',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -227,7 +227,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     context: context,
                     icon: Icons.medical_services_outlined,
                     title: 'Medicamentos a administrar',
-                    subtitle: 'Clique para vizualizar',
+                    subtitle: 'Clique para visualizar',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -241,7 +241,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     context: context,
                     icon: Icons.warning_amber_outlined,
                     title: 'Emergências recentes',
-                    subtitle: 'Clique para vizualizar',
+                    subtitle: 'Clique para visualizar',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -255,7 +255,7 @@ class _HomeCuidadorScreenState extends State<HomeCuidadorScreen> {
                     context: context,
                     icon: Icons.task_alt,
                     title: 'Tarefas Pendentes',
-                    subtitle: 'Clique para vizualizar',
+                    subtitle: 'Clique para visualizar',
                     onTap: () {
                       Navigator.push(
                         context,

@@ -56,30 +56,31 @@ class _SentimentosPacienteScreenState extends State<SentimentosPacienteScreen> {
     });
 
     try {
-      final Map<String, dynamic> requestBody = {
-        'paciente_id': widget.paciente.id,
-        'estado_geral': _selectedSentiment,
-        'observacoes_sentimentos': _searchController.text,
-      };
+      print("FUNCIONALIDADE REMOVIDA");
+      // final Map<String, dynamic> requestBody = {
+      //   'paciente_id': widget.paciente.id,
+      //   'estado_geral': _selectedSentiment,
+      //   'observacoes_sentimentos': _searchController.text,
+      // };
 
-      final response = await http.post(
-        Uri.parse('${Config.apiUrl}/api/registrosdiarios/sentimentos'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(requestBody),
-      );
+      // final response = await http.post(
+      //   Uri.parse('${Config.apiUrl}/api/registrosdiarios/sentimentos'),
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: json.encode(requestBody),
+      // );
 
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> data = json.decode(response.body);
+      // if (response.statusCode == 201) {
+      //   final Map<String, dynamic> data = json.decode(response.body);
 
-        if (data['success'] == true) {
-          _alreadySaved = true; // ✅ ADICIONE ESTA LINHA - marca como já salvo
-          _navegarParaSinaisClinicos();
-        } else {
-          _mostrarErro(data['message'] ?? 'Erro ao salvar sentimentos');
-        }
-      } else {
-        _mostrarErro('Erro na conexão: ${response.statusCode}');
-      }
+      //   if (data['success'] == true) {
+      _alreadySaved = true; // ✅ ADICIONE ESTA LINHA - marca como já salvo
+      _navegarParaSinaisClinicos();
+      //   } else {
+      //     _mostrarErro(data['message'] ?? 'Erro ao salvar sentimentos');
+      //   }
+      // } else {
+      //   _mostrarErro('Erro na conexão: ${response.statusCode}');
+      // }
     } catch (e) {
       _mostrarErro('Erro: $e');
     } finally {
